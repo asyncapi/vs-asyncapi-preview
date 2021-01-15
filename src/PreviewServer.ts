@@ -55,7 +55,7 @@ export class PreviewServer {
       }
     });
 
-    app.use('/file/:filename', (req, res) => {
+    app.use('/file/*', (req, res) => {
       // res.header('Content-Type', 'text/html').send(PREVIEW_HTML);
       let htmlContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'preview.html')).toString('utf-8');
       res.setHeader('Content-Type', 'text/html');
