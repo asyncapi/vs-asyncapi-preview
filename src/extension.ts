@@ -46,7 +46,7 @@ export async function activate(context: vscode.ExtensionContext) {
         progress.report({ increment: 70 });
         const previewInBrowser: boolean = !!vscode.workspace.getConfiguration('asyncapiPreview').previewInBrowser;
         if (previewInBrowser) {
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(this.previewUrl));
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(previewServer.getUrl(fileName)));
         } else {
           let inlinePreview = new Preview(previewServer.getUrl(fileName), fileName);
           context.subscriptions.push(inlinePreview.disposable);
@@ -54,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
         progress.report({ increment: 90 });
 
-        return new Promise(resolve => {
+        return new Promise<void>(resolve => {
           const intervalRef = setInterval(() => {
             if (previewServer.isServerRunning()) {
               clearInterval(intervalRef);
