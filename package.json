@@ -31,7 +31,8 @@
   ],
   "activationEvents": [
     "onLanguage:yml",
-    "onLanguage:yaml"
+    "onLanguage:yaml",
+    "onCommand:asyncapi.preview"
   ],
   "main": "./out/index",
   "scripts": {
