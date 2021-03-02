@@ -6,6 +6,12 @@
 
 It works on asyncapi files in yaml format. Preview happens in real time as you type.
 
+## Requirements
+AsyncAPI Playground Viewer uses https://github.com/asyncapi/generator which requires this software to be installed:
+
+- v12.16+ < Node.js
+- v6.13.7+ < npm
+
 ## Preview
 
 To start
