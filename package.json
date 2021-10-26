@@ -123,7 +123,7 @@
   },
   "dependencies": {
     "@asyncapi/generator": "^1.0.0-rc.11",
-    "@asyncapi/html-template": "^0.12.0",
+    "@asyncapi/html-template": "^0.23.12",
     "chokidar": "^3.4.2",
     "express": "^4.17.1",
     "js-yaml": "^3.13.1",
