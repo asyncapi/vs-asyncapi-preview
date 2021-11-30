@@ -37,7 +37,11 @@
   "main": "./out/index",
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
-    "compile": "tsc -watch -p ./"
+    "compile": "tsc -watch -p ./",
+    "lint": "echo \"No linter configured yet\"",
+    "generate:assets": "echo \"No assets to configure\"",
+    "test": "echo \"No tests configured yet\""
+
   },
   "contributes": {
     "commands": [
