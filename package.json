@@ -58,6 +58,12 @@
           "when": "resourceLangId == yaml && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview"
         }
+      ],
+      "commandPalette": [
+        {
+          "command": "asyncapi.preview",
+          "when": "false"
+        }
       ]
     }
   },
