@@ -82,11 +82,11 @@ async function promptForAsyncapiFile() {
 }
 
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {
-  const asyncapiWebComponentJs = webview.asWebviewUri(
+  const asyncapiComponentJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone/index.js')
   );
-  const asyncapiWebComponentCss = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.css')
+  const asyncapiComponentCss = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.min.css')
   );
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
@@ -94,13 +94,13 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="${asyncapiWebComponentCss}">
+    <link rel="stylesheet" href="${asyncapiComponentCss}">
   </head>
   <body x-timestamp="${Date.now()}">
     
     <div id="asyncapi"></div>
 
-    <script src="${asyncapiWebComponentJs}"></script>
+    <script src="${asyncapiComponentJs}"></script>
     <script>
       AsyncApiStandalone.render({
         schema: {

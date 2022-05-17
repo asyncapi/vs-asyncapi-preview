@@ -53,8 +53,8 @@ const extensionConfig = {
           to: 'node_modules/@asyncapi/react-component/browser/standalone/index.js',
         },
         {
-          from: 'node_modules/@asyncapi/react-component/styles/default.css',
-          to: 'node_modules/@asyncapi/react-component/styles/default.css',
+          from: 'node_modules/@asyncapi/react-component/styles/default.min.css',
+          to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
         },
       ],
     }),
