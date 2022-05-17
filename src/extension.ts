@@ -30,9 +30,12 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  let disposable = vscode.commands.registerCommand('asyncapi.preview', (uri: vscode.Uri) => {
-    console.log('Opening asyncapi file', uri.fsPath);
-    openAsyncAPI(context, uri);
+  let disposable = vscode.commands.registerCommand('asyncapi.preview', async (uri: vscode.Uri) => {
+    uri = uri || (await promptForAsyncapiFile());
+    if (uri) {
+      console.log('Opening asyncapi file', uri.fsPath);
+      openAsyncAPI(context, uri);
+    }
   });
 
   context.subscriptions.push(disposable);
@@ -61,6 +64,21 @@ function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
     delete openAsyncapiFiles[uri.fsPath];
   });
   openAsyncapiFiles[uri.fsPath] = panel;
+}
+
+async function promptForAsyncapiFile() {
+  if (isAsyncAPIFile(vscode.window.activeTextEditor?.document.getText() || '')) {
+    return vscode.window.activeTextEditor?.document.uri;
+  }
+  return await vscode.window.showOpenDialog({
+    canSelectFiles: true,
+    canSelectFolders: false,
+    canSelectMany: false,
+    openLabel: 'Open AsyncAPI file',
+    filters: {
+      AsyncAPI: ['yml', 'yaml', 'json'],
+    },
+  });
 }
 
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {

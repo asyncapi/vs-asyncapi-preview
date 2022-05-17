@@ -40,7 +40,6 @@
       {
         "command": "asyncapi.preview",
         "title": "Preview AsyncAPI",
-        "enablement": "asyncapi.isAsyncAPI",
         "icon": {
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
@@ -61,8 +60,7 @@
       ],
       "commandPalette": [
         {
-          "command": "asyncapi.preview",
-          "when": "false"
+          "command": "asyncapi.preview"
         }
       ]
     }
