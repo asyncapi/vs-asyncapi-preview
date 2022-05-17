@@ -50,8 +50,8 @@ function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
       retainContextWhenHidden: true,
       localResourceRoots: [
         vscode.Uri.file(path.dirname(uri.fsPath)),
-        vscode.Uri.joinPath(context.extensionUri, 'node_modules/@asyncapi/react-component/browser/standalone'),
-        vscode.Uri.joinPath(context.extensionUri, 'node_modules/@asyncapi/react-component/styles'),
+        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone'),
+        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles'),
       ],
     });
   panel.title = path.basename(uri.fsPath);
@@ -65,10 +65,10 @@ function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
 
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {
   const asyncapiWebComponentJs = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'node_modules/@asyncapi/react-component/browser/standalone/index.js')
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone/index.js')
   );
   const asyncapiWebComponentCss = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'node_modules/@asyncapi/react-component/styles/default.css')
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.css')
   );
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
