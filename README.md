@@ -8,7 +8,7 @@ AsyncAPI Preview was simplified and reworked from scratch to use the latest [@as
 
 You can open AsyncAPI Preview from editor title/context menu.
 
-![AsyncAPI Preview](resources/asyncapi-editor-title-context.png)
+![AsyncAPI Preview](docs/asyncapi-editor-title-context.png)
 
 ## Automatic hot-reloading
 
