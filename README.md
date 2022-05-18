@@ -35,13 +35,13 @@ THEN
 
 - Preview it in vscode Itself like this
 
-![AsyncAPI Editor Title Context Menu](https://github.com/ivangsa/vs-asyncapi-preview/raw/master/docs/asyncapi-editor-title-context.png)
+![AsyncAPI Editor Title Context Menu](./docs/asyncapi-editor-title-context.png)
 
-![AsyncAPI Preview Command](https://github.com/ivangsa/vs-asyncapi-preview/raw/master/docs/asyncapi-preview-command.png)
+![AsyncAPI Preview Command](./docs/asyncapi-preview-command.png)
 
 ## Configurations
 
-![AsyncAPI Settings](https://github.com/ivangsa/vs-asyncapi-preview/raw/master/docs/asyncapi-settings.png)
+![AsyncAPI Settings](./docs/asyncapi-settings.png)
 
 ### Opening In External browser
 
@@ -73,7 +73,7 @@ Default host(localhost) of the preview url can be changed by changing the `async
 
 To stop the preview server simply click the status bar item.
 
-![Stop AsyncAPI Server](https://github.com/ivangsa/vs-asyncapi-preview/raw/master/docs/asyncapi-stop-preview-server.png)
+![Stop AsyncAPI Server](./docs/asyncapi-stop-preview-server.png)
 
 ## Releases
 
