@@ -1,96 +1,126 @@
 import * as vscode from 'vscode';
-import * as YAML from 'js-yaml';
-import { Preview } from './Preview';
-import { PreviewServer } from './PreviewServer';
-import * as AsyncapiSchema_2_0_0 from './schemas/asyncapi-2.0.0.json';
+import * as path from 'path';
 
-const ASYNCAPI_SCHEMA = JSON.stringify(AsyncapiSchema_2_0_0);
+const openAsyncapiFiles: { [id: string]: vscode.WebviewPanel } = {}; // vscode.Uri.fsPath => vscode.WebviewPanel
 
-const previewServer: PreviewServer = new PreviewServer();
-let statusBarItem: vscode.StatusBarItem = null;
+export function activate(context: vscode.ExtensionContext) {
+  console.log('Congratulations, your extension "asyncapi-preview" is now active!');
 
-export async function activate(context: vscode.ExtensionContext) {
-  const redhatExtension = vscode.extensions.getExtension('redhat.vscode-yaml');
-  !redhatExtension.isActive || (await redhatExtension.activate());
+  // sets context to show "AsyncAPI Preview" button on Editor Title Bar
+  function setAsyncAPIPreviewContext(document: vscode.TextDocument) {
+    const isAsyncAPI = (document.languageId === 'yml' || document.languageId === 'yaml') && isAsyncAPIFile(document.getText());
+    console.log('Setting context for asyncapi.isAsyncAPI', isAsyncAPI, document.uri.fsPath);
+    vscode.commands.executeCommand('setContext', 'asyncapi.isAsyncAPI', isAsyncAPI);
+  }
 
-  try {
-    redhatExtension.exports.registerContributor(
-      'asyncapipreview',
-      uri => {
-        for (let document of vscode.workspace.textDocuments) {
-          if (document.uri.toString() === uri) {
-            const parsedYAML = YAML.safeLoad(document.getText()) as any;
-            if (parsedYAML && parsedYAML.asyncnapi) {
-              return 'asyncapi:preview';
-            }
-          }
-        }
-        return null;
-      },
-      uri => (uri === 'asyncapi:preview' ? ASYNCAPI_SCHEMA : null)
-    );
-  } catch (ex) {}
+  if (vscode.window.activeTextEditor?.document) {
+    setAsyncAPIPreviewContext(vscode.window.activeTextEditor.document);
+  }
 
-  let disposable = vscode.commands.registerCommand('asyncapi.preview', uri => {
-    vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: 'Starting Asyncapi Preview',
-      },
-      async (progress, token) => {
-        progress.report({ increment: 0 });
-        previewServer.startServer();
-        progress.report({ increment: 50 });
-        const fileName = uri ? uri.fsPath : vscode.window.activeTextEditor.document.fileName;
-        previewServer.update(fileName);
-        progress.report({ increment: 70 });
-        const previewInBrowser: boolean = !!vscode.workspace.getConfiguration('asyncapiPreview').previewInBrowser;
-        if (previewInBrowser) {
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(previewServer.getUrl(fileName)));
-        } else {
-          let inlinePreview = new Preview(previewServer.getUrl(fileName), fileName);
-          context.subscriptions.push(inlinePreview.disposable);
-        }
-
-        progress.report({ increment: 90 });
-
-        return new Promise<void>(resolve => {
-          const intervalRef = setInterval(() => {
-            if (previewServer.isServerRunning()) {
-              clearInterval(intervalRef);
-              resolve();
-              if (!statusBarItem) {
-                statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 10);
-                statusBarItem.command = 'asyncapi.stop';
-                statusBarItem.text = 'AsyncAPI Preview';
-                statusBarItem.tooltip = 'Stop AsyncAPI Preview Server';
-                statusBarItem.show();
-                context.subscriptions.push(statusBarItem);
-              }
-            }
-          }, 1000);
-        });
-      }
-    );
-  });
-  vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
-    if (e.document === vscode.window.activeTextEditor.document) {
-      previewServer.update(e.document.fileName, e.document.getText());
+  vscode.window.onDidChangeActiveTextEditor(e => {
+    if (e?.document) {
+      setAsyncAPIPreviewContext(e.document);
     }
   });
+
+  vscode.workspace.onDidSaveTextDocument(document => {
+    if (openAsyncapiFiles[document.uri.fsPath]) {
+      console.log('Reloading asyncapi file', document.uri.fsPath);
+      openAsyncAPI(context, document.uri);
+    }
+  });
+
+  let disposable = vscode.commands.registerCommand('asyncapi.preview', async (uri: vscode.Uri) => {
+    uri = uri || (await promptForAsyncapiFile());
+    if (uri) {
+      console.log('Opening asyncapi file', uri.fsPath);
+      openAsyncAPI(context, uri);
+    }
+  });
+
   context.subscriptions.push(disposable);
-  context.subscriptions.push(
-    vscode.commands.registerCommand('asyncapi.stop', () => {
-      previewServer.stop();
-      if (statusBarItem) {
-        statusBarItem.hide();
-        statusBarItem.dispose();
-        statusBarItem = null;
-      }
-    })
-  );
 }
 
-export function deactivate() {
-  if (previewServer) previewServer.stop();
+function isAsyncAPIFile(text: string) {
+  return text.includes('asyncapi:');
 }
+
+function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
+  const panel: vscode.WebviewPanel =
+    openAsyncapiFiles[uri.fsPath] ||
+    vscode.window.createWebviewPanel('asyncapi-preview', '', vscode.ViewColumn.Two, {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+      localResourceRoots: [
+        vscode.Uri.file(path.dirname(uri.fsPath)),
+        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone'),
+        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles'),
+      ],
+    });
+  panel.title = path.basename(uri.fsPath);
+  panel.webview.html = getWebviewContent(context, panel.webview, uri);
+
+  panel.onDidDispose(() => {
+    delete openAsyncapiFiles[uri.fsPath];
+  });
+  openAsyncapiFiles[uri.fsPath] = panel;
+}
+
+async function promptForAsyncapiFile() {
+  if (isAsyncAPIFile(vscode.window.activeTextEditor?.document.getText() || '')) {
+    return vscode.window.activeTextEditor?.document.uri;
+  }
+  return await vscode.window.showOpenDialog({
+    canSelectFiles: true,
+    canSelectFolders: false,
+    canSelectMany: false,
+    openLabel: 'Open AsyncAPI file',
+    filters: {
+      AsyncAPI: ['yml', 'yaml', 'json'],
+    },
+  });
+}
+
+function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {
+  const asyncapiComponentJs = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone/index.js')
+  );
+  const asyncapiComponentCss = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.min.css')
+  );
+  const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
+  const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="${asyncapiComponentCss}">
+  </head>
+  <body x-timestamp="${Date.now()}">
+    
+    <div id="asyncapi"></div>
+
+    <script src="${asyncapiComponentJs}"></script>
+    <script>
+      AsyncApiStandalone.render({
+        schema: {
+          url: '${asyncapiWebviewUri}',
+          options: { method: "GET", mode: "cors" },
+        },
+        config: {
+          show: {
+            sidebar: true,
+            errors: true,
+          },
+          parserOptions: { path: '${asyncapiBasePath}' }
+        },
+      }, document.getElementById('asyncapi'));
+    </script>
+
+  </body>
+</html>
+  `;
+  return html;
+}
+
+export function deactivate() {}
