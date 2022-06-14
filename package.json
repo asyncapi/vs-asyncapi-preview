@@ -9,7 +9,7 @@
     "theme": "dark"
   },
   "license": "Apache-2.0",
-  "publisher": "ivangsa",
+  "publisher": "asyncapi",
   "author": {
     "name": "Iván García Sainz-Aja",
     "email": "ivangsa@gmail.com",
@@ -76,6 +76,9 @@
   },
   "devDependencies": {
     "@asyncapi/react-component": "^1.0.0-next.38",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/github": "7.2.3",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "14.x",
@@ -83,13 +86,35 @@
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
     "@vscode/test-electron": "^2.1.3",
+    "conventional-changelog-conventionalcommits": "^4.2.3",
     "copy-webpack-plugin": "^10.2.4",
     "eslint": "^8.14.0",
     "glob": "^8.0.1",
     "mocha": "^9.2.2",
+    "semantic-release": "19.0.3",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.4",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2"
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      "@semantic-release/github"
+    ]
   }
 }
