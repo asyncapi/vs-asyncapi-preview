@@ -73,7 +73,8 @@
     "lint": "eslint src --ext ts",
     "test": "",
     "generate:assets": "",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION"
   },
   "devDependencies": {
     "@asyncapi/react-component": "^1.0.0-next.38",
