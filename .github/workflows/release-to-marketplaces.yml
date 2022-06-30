@@ -7,8 +7,8 @@ on:
 
 jobs:
 
-  release:
-    name: Release to marketplaces
+  release-open-vsx:
+    name: Release to Open VSX
     # such a specific commit messages comes from if-nodejs-version-bump.yml workflow
     if: startsWith(github.event.commits[0].message, 'chore(release):')
     runs-on: ubuntu-latest
@@ -25,12 +25,27 @@ jobs:
         run: npm ci
       - name: Publish to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v1
-        id: publishToOpenVSX
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
+
+  release-vs-code-marketplace:
+    name: Release to VS Code Marketplace
+    # such a specific commit messages comes from if-nodejs-version-bump.yml workflow
+    if: startsWith(github.event.commits[0].message, 'chore(release):')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+      - name: Install dependencies
+        run: npm ci
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v1
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
-          extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
