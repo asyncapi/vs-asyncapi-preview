@@ -2,7 +2,7 @@
   "name": "asyncapi-preview",
   "displayName": "asyncapi-preview",
   "description": "Preview AsyncAPI documents inside VSCode.",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "icon": "asyncapi-logo.png",
   "galleryBanner": {
     "color": "#4a4a4a",
