@@ -1,4 +1,4 @@
-[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/ivangsa.asyncapi-preview.svg 'Current Release')](https://marketplace.visualstudio.com/items?itemName=ivangsa.asyncapi-preview) [![Marketplace Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/ivangsa.asyncapi-preview.svg 'Current Release')](https://marketplace.visualstudio.com/items?itemName=ivangsa.asyncapi-preview.svg)
+[![Marketplace Version](https://vsmarketplacebadge.apphb.com/version/asyncapi.asyncapi-preview.svg 'Current Release')](https://marketplace.visualstudio.com/items?itemName=asyncapi.asyncapi-preview) [![Marketplace Downloads](https://vsmarketplacebadge.apphb.com/downloads-short/asyncapi.asyncapi-preview.svg 'Current Release')](https://marketplace.visualstudio.com/items?itemName=asyncapi.asyncapi-preview.svg)
 
 # AsyncAPI Preview
 
