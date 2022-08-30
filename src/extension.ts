@@ -46,16 +46,22 @@ function isAsyncAPIFile(text: string) {
 }
 
 function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
+  const localResourceRoots = [
+    vscode.Uri.file(path.dirname(uri.fsPath)),
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone'),
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles'),
+  ];
+  if (vscode.workspace.workspaceFolders) {
+    vscode.workspace.workspaceFolders.forEach(folder => {
+      localResourceRoots.push(folder.uri);
+    });
+  }
   const panel: vscode.WebviewPanel =
     openAsyncapiFiles[uri.fsPath] ||
     vscode.window.createWebviewPanel('asyncapi-preview', '', vscode.ViewColumn.Two, {
       enableScripts: true,
       retainContextWhenHidden: true,
-      localResourceRoots: [
-        vscode.Uri.file(path.dirname(uri.fsPath)),
-        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone'),
-        vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles'),
-      ],
+      localResourceRoots,
     });
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri);
