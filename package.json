@@ -32,6 +32,7 @@
   "activationEvents": [
     "onLanguage:yml",
     "onLanguage:yaml",
+    "onLanguage:json",
     "onCommand:asyncapi.preview"
   ],
   "main": "./dist/extension.js",
