@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // sets context to show "AsyncAPI Preview" button on Editor Title Bar
   function setAsyncAPIPreviewContext(document: vscode.TextDocument) {
-    const isAsyncAPI = (document.languageId === 'yml' || document.languageId === 'yaml') && isAsyncAPIFile(document.getText());
+    const isAsyncAPI = isAsyncAPIFile(document);
     console.log('Setting context for asyncapi.isAsyncAPI', isAsyncAPI, document.uri.fsPath);
     vscode.commands.executeCommand('setContext', 'asyncapi.isAsyncAPI', isAsyncAPI);
   }
@@ -41,8 +41,22 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 }
 
-function isAsyncAPIFile(text: string) {
-  return text.includes('asyncapi:');
+function isAsyncAPIFile(document?: vscode.TextDocument) {
+  if (!document) {
+    return false;
+  }
+  if (document.languageId === 'json') {
+    try {
+      const json = JSON.parse(document.getText());
+      return json.asyncapi;
+    } catch (e) {
+      return false;
+    }
+  }
+  if(document.languageId === 'yml' || document.languageId === 'yaml') {
+    return document.getText().match('^asyncapi:') !== null;
+  }
+  return false;
 }
 
 function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
@@ -73,7 +87,7 @@ function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
 }
 
 async function promptForAsyncapiFile() {
-  if (isAsyncAPIFile(vscode.window.activeTextEditor?.document.getText() || '')) {
+  if (isAsyncAPIFile(vscode.window.activeTextEditor?.document)) {
     return vscode.window.activeTextEditor?.document.uri;
   }
   return await vscode.window.showOpenDialog({

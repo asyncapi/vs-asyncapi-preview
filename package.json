@@ -50,12 +50,12 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview",
           "group": "navigation"
         },
         {
-          "when": "resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview"
         }
       ],
