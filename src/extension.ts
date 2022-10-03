@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // sets context to show "AsyncAPI Preview" button on Editor Title Bar
   function setAsyncAPIPreviewContext(document: vscode.TextDocument) {
-    const isAsyncAPI = (document.languageId === 'yml' || document.languageId === 'yaml') && isAsyncAPIFile(document.getText());
+    const isAsyncAPI = (document.languageId === 'json' || document.languageId === 'yml' || document.languageId === 'yaml') && isAsyncAPIFile(document.getText());
     console.log('Setting context for asyncapi.isAsyncAPI', isAsyncAPI, document.uri.fsPath);
     vscode.commands.executeCommand('setContext', 'asyncapi.isAsyncAPI', isAsyncAPI);
   }
@@ -42,7 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function isAsyncAPIFile(text: string) {
-  return text.includes('asyncapi:');
+  return text.includes('asyncapi:') || text.includes('"asyncapi"');
 }
 
 function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
