@@ -45,13 +45,17 @@
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
         }
+      },
+      {
+        "command": "asyncapi.paste",
+        "title": "AsyncAPI: Paste as Schema"
       }
     ],
     "snippets": [
-        {
-            "language": "yaml",
-            "path": "./snippets/snippets.json"
-        }
+      {
+        "language": "yaml",
+        "path": "./snippets/snippets.json"
+      }
     ],
     "menus": {
       "editor/title": [
@@ -68,6 +72,22 @@
       "commandPalette": [
         {
           "command": "asyncapi.preview"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "command": "asyncapi.paste",
+          "group": "9_cutcopypaste@5"
+        }
+      ],
+      "keybindings": [
+        {
+          "command": "asyncapi.paste",
+          "key": "Ctrl+V",
+          "linux": "Ctrl+Shift+V",
+          "mac": "Cmd+V",
+          "when": "editorTextFocus"
         }
       ]
     }
@@ -99,6 +119,7 @@
     "conventional-changelog-conventionalcommits": "^4.2.3",
     "copy-webpack-plugin": "^10.2.4",
     "eslint": "^8.14.0",
+    "genson-js": "0.0.8",
     "glob": "^8.0.1",
     "mocha": "^9.2.2",
     "semantic-release": "19.0.3",
