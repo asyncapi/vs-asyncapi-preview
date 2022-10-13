@@ -47,6 +47,12 @@
         }
       }
     ],
+    "snippets": [
+        {
+            "language": "yaml",
+            "path": "./snippets/snippets.json"
+        }
+    ],
     "menus": {
       "editor/title": [
         {
