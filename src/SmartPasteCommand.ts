@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yml from 'js-yaml';
-import { createSchema } from './lib/genson-js/schema-builder';
+import { createSchema } from 'genson-js';
 
 export async function asyncapiSmartPaste() {
     let editor = vscode.window.activeTextEditor;
@@ -13,7 +13,6 @@ export async function asyncapiSmartPaste() {
     let currentLineText = editor.document.lineAt(start.line).text;
     let clipboad = await vscode.env.clipboard.readText();
 
-    console.log("Smart Pasting", clipboad);
     const json = parse(clipboad);
     if(typeof json === 'object') {
         const schema = { PastedSchema: createSchema(json) };
@@ -50,7 +49,7 @@ function parse(text: string) {
     }
 }
 
-function stringify(schema, languageId: string, indentYml: number) {
+function stringify(schema: object, languageId: string, indentYml: number) {
     if(languageId === 'json') {
         return JSON.stringify(schema, null, 2);
     } else {

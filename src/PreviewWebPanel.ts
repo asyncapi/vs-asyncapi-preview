@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-export function previewAsyncAPI(context) {
+export function previewAsyncAPI(context: vscode.ExtensionContext) {
  return async (uri: vscode.Uri) => {
     uri = uri || (await promptForAsyncapiFile()) as vscode.Uri;
     if (uri) {
