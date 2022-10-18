@@ -18,7 +18,7 @@ Automatic hot-reloading on editor save, but currently, it doesn't reload when sa
 
 ### Available snippets:
 
-Open an empty or otherwise yaml file and start typing one of the following prefixes:
+Open an empty or otherwise yaml file and start typing one of the following prefixes, you may need to press `Ctrl+space` to trigger autocompletion in some cases:
 
 - `add asyncapi skeleton`: Adds an asyncapi skeleton for jump starting your API editing.
 - `add asyncapi subscribe to async request`: Inserts a new subscribe operation, for listening to incoming async requests/commands.
