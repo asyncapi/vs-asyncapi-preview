@@ -1,0 +1,82 @@
+{
+    "Add AsyncAPI Skeleton": {
+        "prefix": "add asyncapi skeleton",
+        "body": [
+            "asyncapi: '2.5.0'",
+            "info:",
+            "  title: ${1:Title}",
+            "  version: '1.0.0'",
+            "  description: |",
+            "    Add your multiline description here.",
+            "  contact:",
+            "    name: ${2:Contact Name}",
+            "    email: ${3:email@company.com}",
+            "",
+            "servers:",
+            "  production:",
+            "    url: server.url",
+            "    protocol: mqtt",
+            "    description: server description",
+            "",
+            "defaultContentType: application/json",
+            "",
+            "channels:",
+            "  this.is.one.channel.please.rename:",
+            "    description: A sample topic on which messages may be produced and consumed.",
+            "${4:# type 'add publish' or 'add subscribe' to get snippets autocomplete}",
+            "",
+            "",
+            "",
+            "components:",
+            "  messages:",
+            "    description: add one message and remove this line",
+            "    # type here 'add message' to get snippets autocomplete",
+            "",
+            "",
+            "  schemas:",
+            "    OneEntity:",
+            "      type: object",
+            "",
+            ""
+        ]
+    },
+    "Add Subscribe to Async Request": {
+        "prefix": "add asyncapi subscribe to async request",
+        "body": [
+            "    subscribe:",
+            "      summary: ${1:Entity} Async Requests",
+            "      operationId: do${1:Entity}Request",
+            "      tags:",
+            "        - name: ${1:Entity}",
+            "      message:",
+            "        \\$ref: '#/components/messages/${1:Entity}RequestMessage'",
+            ""
+        ]
+    },
+    "Add Publish Event Operation": {
+        "prefix": "add asyncapi publish event operation",
+        "body": [
+            "    publish:",
+            "      summary: ${1:Entity} Domain Events",
+            "      operationId: on${1:Entity}Event",
+            "      tags:",
+            "        - name: ${1:Entity}",
+            "      message:",
+            "        \\$ref: '#/components/messages/${1:Entity}EventMessage'",
+            ""
+        ]
+    },
+    "Add AsyncAPI Message": {
+        "prefix": "add asyncapi message",
+        "body": [
+            "    ${1:Entity}${2|Request,Event|}Message:",
+            "      name: ${1}${2}Message",
+            "      title: Async ${2} for a ${1}",
+            "      summary: Async ${2} for a ${1}",
+            "      schemaFormat: application/vnd.aai.asyncapi;version=2.4.0",
+            "      payload:",
+            "        \\$ref: '#/components/schemas/${1}'",
+            ""
+        ]
+    }
+}
