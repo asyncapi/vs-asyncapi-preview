@@ -8,7 +8,7 @@ AsyncAPI Preview was simplified and reworked from scratch to use the latest [@as
 
 ~~You can open AsyncAPI Preview from the editor title/context menu.~~
 
-This extension is no longer working from context menu,besides you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`
+This extension is no longer working from context menu, besides you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`.
 
 ![AsyncAPI Preview](docs/asyncapi-preview-extension-usage.png)
 
