@@ -1,0 +1,11 @@
+title: asyncapi-preview
+description: |
+  VSCode extension that enables you to:
+    - Preview documentation generated using you AsyncAPI document. It uses AsyncAPI React component under the hood,
+    - Create AsyncAPI documents faster using SmartPaste functionality
+filters:
+    technology:
+        - VSCode
+        - SmartPaste
+    categories:
+        - ide-extension
