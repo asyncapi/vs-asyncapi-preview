@@ -28,6 +28,9 @@ export function activate(context: vscode.ExtensionContext) {
       console.log('Reloading asyncapi file', document.uri.fsPath);
       openAsyncAPI(context, document.uri);
     }
+    if (vscode.window.activeTextEditor?.document) {
+      setAsyncAPIPreviewContext(vscode.window.activeTextEditor.document);
+    }
   });
 
 
