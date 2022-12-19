@@ -62,7 +62,7 @@ async function promptForAsyncapiFile() {
   if (isAsyncAPIFile(vscode.window.activeTextEditor?.document)) {
     return vscode.window.activeTextEditor?.document.uri;
   }
-  return await vscode.window.showOpenDialog({
+  const uris = await vscode.window.showOpenDialog({
     canSelectFiles: true,
     canSelectFolders: false,
     canSelectMany: false,
@@ -71,6 +71,7 @@ async function promptForAsyncapiFile() {
       AsyncAPI: ['yml', 'yaml', 'json'],
     },
   });
+  return uris?.[0];
 }
 
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {
