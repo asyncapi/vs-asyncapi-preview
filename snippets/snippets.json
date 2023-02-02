@@ -2,7 +2,7 @@
     "Add AsyncAPI Skeleton": {
         "prefix": "add asyncapi skeleton",
         "body": [
-            "asyncapi: '2.5.0'",
+            "asyncapi: '2.6.0'",
             "info:",
             "  title: ${1:Title}",
             "  version: '1.0.0'",
@@ -73,7 +73,7 @@
             "      name: ${1}${2}Message",
             "      title: Async ${2} for a ${1}",
             "      summary: Async ${2} for a ${1}",
-            "      schemaFormat: application/vnd.aai.asyncapi;version=2.4.0",
+            "      schemaFormat: application/vnd.aai.asyncapi;version=2.6.0",
             "      payload:",
             "        \\$ref: '#/components/schemas/${1}'",
             ""
