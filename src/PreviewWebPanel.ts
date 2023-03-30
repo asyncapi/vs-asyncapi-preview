@@ -88,6 +88,15 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   <html>
     <head>
       <link rel="stylesheet" href="${asyncapiComponentCss}">
+      <style> 
+      body {
+        color: #121212;
+        background-color: #fff;
+      }
+      h1 {
+        color: #121212;
+      }
+      </style>
     </head>
     <body x-timestamp="${Date.now()}">
       
