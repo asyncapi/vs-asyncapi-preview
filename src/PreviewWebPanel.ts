@@ -92,6 +92,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       body {
         color: #121212;
         background-color: #fff;
+        word-wrap: break-word; 
       }
       h1 {
         color: #121212;
