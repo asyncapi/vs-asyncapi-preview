@@ -14,17 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
       - name: Install dependencies
         run: npm ci
       - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@dfe4f6ad46624424fe24cb5bca79839183399045 # v1.4 https://github.com/HaaLeo/publish-vscode-extension/releases/tag/v1.4.0
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
 
@@ -35,17 +35,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 16
           cache: 'npm'
           cache-dependency-path: '**/package-lock.json'
       - name: Install dependencies
         run: npm ci
       - name: Publish to Visual Studio Marketplace
-        uses: HaaLeo/publish-vscode-extension@v1
+        uses: HaaLeo/publish-vscode-extension@dfe4f6ad46624424fe24cb5bca79839183399045 # v1.4 https://github.com/HaaLeo/publish-vscode-extension/releases/tag/v1.4.0
         with:
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
