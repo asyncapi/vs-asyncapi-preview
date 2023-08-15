@@ -1,0 +1,62 @@
+asyncapi-latest-version:
+  - message: "The latest version is not used. You should update to the '2.4.0' version."
+    errorCheck: "version"
+    quickfix:
+      text: "2.4.0"
+      type: "update"
+  - message: "The latest version is not used. You should update to the '2.5.0' version."
+    errorCheck: "version"
+    quickfix:
+      text: "2.5.0"
+      type: "update"     
+
+asyncapi-schema:
+  - message: "'title' property type must be string"
+    errorCheck: "title"
+    quickfix:
+      text: "Example API"
+      type: "add"
+  - message: "'version' property type must be string"
+    errorCheck: "version"
+    quickfix:
+      text: "1.0.0"
+      type: "add"  
+  - message: "'name' property type must be string"
+    errorCheck: "name"
+    quickfix:
+      text: "Dummy Name"
+      type: "add"            
+  - message: "'url' property type must be string"
+    errorCheck: "url"
+    quickfix:
+      text: "https://example.com"
+      type: "add"
+  - message: "'description' property type must be string"
+    errorCheck: "description"
+    quickfix:
+      text: "Dummy description"
+      type: "add"
+
+
+asyncapi-info-contact-properties:
+  - message: "Add a 'name'"
+    quickfix:
+      text: "name: Dummy Name"
+      type: "add"
+  - message: "Add a 'email'"
+    quickfix:
+      text: "email: mail@gmail.com"
+      type: "add"
+  - message: "Add a 'url'"
+    quickfix:
+      text: "url: https://example.com"
+      type: "add"
+
+asyncapi-tags-uniqueness:
+  - message: "Delete the same value object"   
+    quickfix:
+      type: "delete"
+  - message: "Update the same value object"   
+    quickfix:
+      type: "append"      
+      text: "-1"
