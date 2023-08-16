@@ -19,13 +19,13 @@ interface QuickFixData {
 
 export function activate(context: vscode.ExtensionContext) {
   // Register code action provider
-  const codeActionProvider = new MyCodeActionProvider();
+  const codeActionProvider = new DiagnosticFixProvider();
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider({ scheme: 'file', language: 'yaml' }, codeActionProvider)
   );
 }
 
-export class MyCodeActionProvider implements vscode.CodeActionProvider {
+export class DiagnosticFixProvider implements vscode.CodeActionProvider {
   private quickFixes: QuickFixData = {};
 
   constructor() {
