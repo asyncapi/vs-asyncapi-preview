@@ -60,12 +60,12 @@
     "menus": {
       "editor/title": [
         {
-          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview",
           "group": "navigation"
         },
         {
-          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview"
         }
       ],
@@ -76,7 +76,7 @@
       ],
       "editor/context": [
         {
-          "when": "resourceLangId == json || resourceLangId == yaml && asyncapi.isAsyncAPI",
+          "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
           "command": "asyncapi.paste",
           "group": "9_cutcopypaste@5"
         }
