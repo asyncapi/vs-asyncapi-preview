@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
+import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI, previewMarkdown} from './PreviewWebPanel';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
 
 
@@ -37,6 +37,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('asyncapi.preview', previewAsyncAPI(context)));
 
   context.subscriptions.push(vscode.commands.registerCommand("asyncapi.paste", asyncapiSmartPaste));
+
+  context.subscriptions.push(vscode.commands.registerCommand('asyncapi.md', previewMarkdown(context)));
 }
 
 export function deactivate() {}

@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { convertAsyncAPIToMermaid } from './ConvertMD';
 
 let position : {x:0,y:0} = {
   x: 0,
@@ -15,6 +16,7 @@ export function previewAsyncAPI(context: vscode.ExtensionContext) {
     }
   };
 }
+
 
 export const openAsyncapiFiles: { [id: string]: vscode.WebviewPanel } = {}; // vscode.Uri.fsPath => vscode.WebviewPanel
 
@@ -56,8 +58,10 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
     });
 
   panel.title = path.basename(uri.fsPath);
+  console.log('Opening HTML');
+  console.log(getWebviewContent(context, panel.webview, uri, position));
   panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
-          
+
   panel.webview.onDidReceiveMessage(
     message => {
       switch (message.type) {
@@ -66,7 +70,6 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
             x: message.scrollX,
             y: message.scrollY
           };
-          
         }
       }
     },
@@ -96,6 +99,23 @@ async function promptForAsyncapiFile() {
   return uris?.[0];
 }
 
+export function previewMarkdown(context: vscode.ExtensionContext) {
+  return "Hello World!";
+
+ }
+
+  async function convertAsyncAPItoMD(context: vscode.ExtensionContext, uri: vscode.Uri) {
+    return "Hello World!";
+
+  }
+  
+function convertToMD(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri, position: {x:0,y:0}){
+  console.log('Converting to MD');
+  const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
+  console.log(asyncapiWebviewUri);
+  return "Hello";
+}
+
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri, position: {x:0,y:0}) {
   const asyncapiComponentJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone/index.js')
@@ -104,13 +124,14 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.min.css')
   );
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
+  const mermaidCode = convertAsyncAPIToMermaid(asyncapiFile.fsPath);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
   const html = `
   <!DOCTYPE html>
   <html>
     <head>
       <link rel="stylesheet" href="${asyncapiComponentCss}">
-      <style> 
+      <style>
       html{
         scroll-behavior: smooth;
       }
@@ -124,10 +145,12 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       }
       </style>
     </head>
+
     <body x-timestamp="${Date.now()}">
-      
       <div id="asyncapi"></div>
-  
+      <pre class="mermaid">
+        ${mermaidCode};
+      </pre>
       <script src="${asyncapiComponentJs}"></script>
       <script>
         const vscode = acquireVsCodeApi();
@@ -144,7 +167,6 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             parserOptions: { path: '${asyncapiBasePath}' }
           },
         }, document.getElementById('asyncapi'));
-        
         window.addEventListener('scrollend', event => {
                 vscode.postMessage({
                   type: 'position',
@@ -152,13 +174,13 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
                   scrollY: window.scrollY || 0
                 });
         });
-        
         window.addEventListener("load", (event) => {
           setTimeout(()=>{window.scrollBy('${position.x}','${position.y}')},1000)
         });
-        
       </script>
-  
+      <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    </script>
     </body>
   </html>
     `;
