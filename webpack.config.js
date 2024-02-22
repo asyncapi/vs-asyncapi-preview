@@ -56,6 +56,10 @@ const extensionConfig = {
           from: 'node_modules/@asyncapi/react-component/styles/default.min.css',
           to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
         },
+        {
+          from: '/node_modules/mermaid/dist/mermaid.min.js',
+          to: '/node_modules/mermaid/dist/mermaid.min.js',
+        },
       ],
     }),
   ],
