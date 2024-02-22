@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
+import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI} from './PreviewWebPanel';
+import { openAsyncAPIMarkdown, openAsyncapiMdFiles, previewMarkdown} from './PreviewMarkdown';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
 
 
@@ -28,6 +29,9 @@ export function activate(context: vscode.ExtensionContext) {
       console.log('Reloading asyncapi file', document.uri.fsPath);
       openAsyncAPI(context, document.uri);
     }
+    if(openAsyncapiMdFiles[document.uri.fsPath]){
+      openAsyncAPIMarkdown(context, document.uri);
+    }
     if (vscode.window.activeTextEditor?.document) {
       setAsyncAPIPreviewContext(vscode.window.activeTextEditor.document);
     }
@@ -37,6 +41,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('asyncapi.preview', previewAsyncAPI(context)));
 
   context.subscriptions.push(vscode.commands.registerCommand("asyncapi.paste", asyncapiSmartPaste));
+
+  context.subscriptions.push(vscode.commands.registerCommand("asyncapi.markdown", previewMarkdown(context)));
 }
 
 export function deactivate() {}
