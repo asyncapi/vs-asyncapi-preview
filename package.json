@@ -147,6 +147,7 @@
   "dependencies": {
     "@asyncapi/parser": "^3.0.7",
     "@types/markdown-it": "^13.0.7",
+    "eta": "^3.2.0",
     "markdown-it": "^14.0.0"
   }
 }
