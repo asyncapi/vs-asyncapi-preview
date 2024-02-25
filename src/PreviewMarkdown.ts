@@ -14,7 +14,6 @@ function buildMarkdown(document:AsyncAPIDocumentInterface | undefined){
   let content = '';
 
   if(document !== undefined){
-    
     content = `
       ${Info(document)}
       ${MermaidDiagram(document)}
