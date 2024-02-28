@@ -96,13 +96,23 @@ async function promptForAsyncapiFile() {
   return uris?.[0];
 }
 
-function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri, position: {x:0,y:0}) {
+function getWebviewContent(
+  context: vscode.ExtensionContext,  // Extension context
+  webview: vscode.Webview,           // Webview instance
+  asyncapiFile: vscode.Uri,          // URI of the AsyncAPI file
+  position: { x: number, y: number } // Position object (unused in this code)
+) {
+  // Get URI for AsyncAPI React component JavaScript file
   const asyncapiComponentJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone/index.js')
   );
+
+  // Get URI for AsyncAPI React component CSS file
   const asyncapiComponentCss = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles/default.min.css')
   );
+}
+
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
   const html = `
