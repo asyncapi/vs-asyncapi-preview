@@ -1,0 +1,55 @@
+<% if (!servers.isEmpty()) { %>
+    <h3> Servers </h3>
+    <% for(let server of servers.all()){ %>
+        <div>
+            <h3><%= server.id().charAt(0).toUpperCase() + server.id().slice(1) %> Server</h3>
+                <p>
+                    <ul>
+                      <li>URL: <%= server.url() %></li>
+                      <li>Protocol: <%= server.protocol() %> <%= server.protocolVersion() ? server.protocolVersion() : '' %></li>
+                    </ul>
+                    <% if(server.hasDescription()) { %>
+                        <p>
+                          Description: <%= server.description() %>
+                        </p>
+                    <% } %>
+                </p>
+            <h4>URL Variables</h4>
+            <Table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Default value</th>
+                    <th>Allowed values</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(let entry of server.variables().all()){ %>
+                    <tr>
+                      <td><%= entry.id() %></td>
+                      <td><%= entry.description() %></td>
+                      <% if(entry.hasDefaultValue()){ %>
+                        <td><%= entry.defaultValue() %></td>
+                      <% }else { %>
+                        <td>_None_</td>
+                      <% } %>
+                      <% if(entry.hasAllowedValues()){ %>
+                        <td><%= entry.allowedValues().map(value => value).join(', ') %></td>
+                      <% }else { %>
+                        <td>_Any_</td>
+                      <% } %>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </Table>
+
+            <%- include(securityPath,{ prototcol: server.protocol(), security: server.security() }) %>
+            <%- include(tagsPath,{ name:"Tags", tags: server.tags() }) %>
+
+            <%- include(bindingsPath,{ name:"Server specific information", bindings: server.bindings(), schemaHelper }) %>
+            <%- include(extensionsPath,{ name:"Server extensions", extensions: server.extensions(), schemaHelper }) %>
+
+        </div>
+    <% } %>
+<% } %>

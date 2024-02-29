@@ -1,27 +1,23 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { isAsyncAPIFile } from './PreviewWebPanel';
-import * as Markdownit from 'markdown-it';
 import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import Info from './components/Info';
-import MermaidDiagram from './components/MermaidDiagram';
+import Asyncapi from './Asyncapi';
 
-const md = Markdownit('commonmark');
+
 const parser = new Parser();
 
-function buildMarkdown(document:AsyncAPIDocumentInterface | undefined){
+
+async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, context: vscode.ExtensionContext){
 
   let content = '';
 
   if(document !== undefined){
     
-    content = `
-      ${Info(document)}
-      ${MermaidDiagram(document)}
-    `;
+    content = await Asyncapi(document, context);
   }
 
-  return md.render(content);
+  return content;
 }
 
 export function previewMarkdown(context: vscode.ExtensionContext) {
@@ -56,7 +52,7 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
     });
 
   const { document } = await fromFile(parser, uri.fsPath).parse();   
-  let result =  buildMarkdown(document); 
+  let result =  await buildMarkdown(document, context); 
 
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, result);

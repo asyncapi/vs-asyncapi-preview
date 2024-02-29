@@ -1,0 +1,5 @@
+<% if (!bindings.isEmpty()) { %>
+    <% for(let binding of bindings.all()){ %>
+        <%- include(SchemaPath,{ schemaName:`${binding.protocol().charAt(0).toUpperCase() + binding.protocol().slice(1)} ${name}`, schema: schemaHelper.jsonToSchema(binding), key: binding.protocol() }) %>
+    <% } %>    
+<%  } %>
