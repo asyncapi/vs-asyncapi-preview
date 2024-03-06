@@ -1,5 +1,3 @@
-
-
 <% if (Object.keys(schemaHelper.getCustomExtensions(extensions) || {}).length !== 0) { %>
-    <%- include(SchemaPath,{ schemaName:name, schema: schemaHelper.jsonToSchema(extensions) }) %>
+    <%- include(schemaPath,{ schemaName:name, schema: schemaHelper.jsonToSchema(extensions) }) %>
 <% } %>

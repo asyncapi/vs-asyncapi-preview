@@ -1,0 +1,117 @@
+<% let renderedRequirements; %>
+<% if(security?.length) { %>
+    <% renderedRequirements = security.map((requirement, idx) => {return { requirement, idx }}).filter(Boolean); %>    
+<% }else if(protocol == 'kafka' || protocol == 'kafka-secure') { %>
+    <% renderedRequirements = {requirement: null}; %>
+<% } %>   
+<% if(renderedRequirements) { %>
+    <% if(security?.length && renderedRequirements.length !== 0) { %>
+        <div>
+            <h4><%= (header || "Security") %></h4>
+            <% for(let { requirement, idx } of renderedRequirements) { %>
+                <% let renderedServerSecurities; %>
+                <% if(!requirement && (protocol == 'kafka' || protocol == 'kafka-secure')) { %>
+                    <% renderedServerSecurities = {securitySchema: null}; %>
+                <% }else if(requirement) { %>
+                    <% renderedServerSecurities = requirement.all().map(requirementItem =>{return {securitySchema: requirementItem.scheme(), requiredScopes: requirementItem.scopes(), key: requirementItem.scheme().type()}} ).filter(Boolean); %>
+                <% } %> 
+                <% if(renderedServerSecurities) { %>
+                    <% if(requirement && renderedServerSecurities.length !== 0) { %>
+                        <h5>Security Requirement</h5>
+                        <% for(let {securitySchema, requiredScopes, key} of renderedServerSecurities) { 
+                             let schemas = []; 
+                             renderSecuritySchemasBasic({ securitySchema, schemas }); 
+                             renderSecuritySchemasKafka({ protocol, securitySchema, schemas }); 
+                             renderSecuritySchemasFlows({ securitySchema, requiredScopes, schemas }); 
+                             schemas.filter(Boolean); 
+                             const type = securitySchema?.type() && serverHelper.securityType(securitySchema.type()); %>
+                            <ul>
+                                <% if(type) { %>
+                                    <li>Type: <%= type %></li>
+                                <% } %>
+                                <% if(schemas.length > 0) { %>
+                                    <% for(let schema of schemas) { %>                                     
+                                        <% if(schema.split('_')[0] == 'OpenID') { %>
+                                            <li>OpenID Connect URL: <a href="<%= schema.split('_')[1] %>"><%= schema.split('_')[2] %></a></li>
+                                        <% }else if(schema.split('_')[0] == 'RequiredScopes'){ %>
+                                            <li>Required Scopes: <%= schema.split('_')[1]? schema.split('_')[1]: 'Nil' %></li>
+                                            <Table>
+                                                <thead>
+                                                  <tr>
+                                                    <th>Flow</th>
+                                                    <th>Auth URL</th>
+                                                    <th>Token URL</th>
+                                                    <th>Refresh URL</th>
+                                                    <th>Scopes</th>
+                                                  </tr>
+                                                </thead>
+                                                <tbody>
+                                                  <% for(let entry of JSON.parse(schema.split('_')[2])){ %>
+                                                    <tr>
+                                                      <td><%= entry[0] %></td>
+                                                        <td><a href="<%= entry[1] %>"><%= entry[1] %></a></td>
+                                                        <td><a href="<%= entry[2] %>"><%= entry[2] %></a></td>
+                                                        <td><a href="<%= entry[3] %>"><%= entry[3] %></a></td>
+                                                      <td><%= entry[4] %></td>
+                                                    </tr>
+                                                  <% } %>
+                                                </tbody>
+                                              </Table>
+                                        <% }else { %>
+                                            <li><%= schema %></li>
+                                        <% } %>  
+                                    <% } %>
+                                <% } %>
+                            </ul>
+                            <% if(securitySchema?.hasDescription()) { %>
+                                <%- md.render(securitySchema.description()) %>
+                            <% } %>
+                        <% } %>
+                    <% } %>
+                <% } %>
+            <% } %>
+        </div>
+    <% } %>
+<% } %>
+
+<% function renderSecuritySchemasBasic({ securitySchema, schemas }) { 
+     if (securitySchema) { 
+       if (securitySchema.name()) { 
+         schemas.push(`Name: ${securitySchema.name()}`);
+       } 
+       if (securitySchema.in()) { 
+         schemas.push(`In: ${securitySchema.in()}`); 
+       } 
+       if (securitySchema.scheme()) { 
+         schemas.push(`Scheme: ${securitySchema.scheme()}`); 
+       } 
+       if (securitySchema.bearerFormat()) { 
+         schemas.push(`Bearer format: ${securitySchema.bearerFormat()}`); 
+       } 
+       if (securitySchema.openIdConnectUrl()) { 
+         schemas.push(`OpenID_${securitySchema.openIdConnectUrl()}_${securitySchema.openIdConnectUrl()}`); 
+       } 
+     } 
+   } 
+  
+   function renderSecuritySchemasKafka({ protocol, securitySchema, schemas }) { 
+     const isKafkaProtocol = protocol === 'kafka' || protocol === 'kafka-secure'; 
+     if (!isKafkaProtocol) { return; } 
+  
+     const { securityProtocol, saslMechanism } = serverHelper.getKafkaSecurity(protocol,securitySchema); 
+  
+     if (securityProtocol) { schemas.push(`security.protocol: ${securityProtocol}`); } 
+     if (saslMechanism) { schemas.push(`sasl.mechanism: ${saslMechanism}`); } 
+   } 
+  
+
+    function flowsRenderer([flowName, flow]) { 
+      return [serverHelper.flowName(flowName) || '-', (flow?.authorizationUrl() ? flow.authorizationUrl() : '-'), (flow?.tokenUrl() ? flow.tokenUrl() : '-'), (flow?.refreshUrl() ? flow.refreshUrl() : '-'), Object.keys(flow?.scopes() || {}).length ? Object.keys(flow.scopes()).map(v => `\`${v}\``).join(', ') : '-' ]; 
+    } 
+   function renderSecuritySchemasFlows({ securitySchema, requiredScopes, schemas }) { 
+     const flows = securitySchema?.flows(); 
+     if (!flows) { return; } 
+  
+     const flowsData = Object.entries({authorizationCode: flows.authorizationCode(),clientCredentials: flows.clientCredentials(),implicit: flows.implicit(),password: flows.password()}); 
+     schemas.push( `RequiredScopes_${ requiredScopes.map(v => `\`${v}\``).join(', ')}_${JSON.stringify(flowsData.map(entry => flowsRenderer(entry)))}` ); 
+   } %>

@@ -1,0 +1,125 @@
+<% if(!channels.isEmpty()) { %>
+    <h2>Operations</h2>
+    <% for(let channel of channels.all()) { %>
+        <% for(let operation of  channel.operations().all()) { %>
+            <% if(operation && channel) { %>
+                <% let type; 
+                   const applyToAllServers = allServersLength === channel.servers().all().length;
+                   const servers = applyToAllServers ? [] : channel.servers().all(); 
+                   const showInfoList = operation.operationId() || (servers && servers.length);
+                 if (operation.isSend()) { 
+                     if (operation.reply() !== undefined) { 
+                     type = 'request'; 
+                     } else { 
+                     type = 'send'; 
+                     } 
+                 } else if (operation.isReceive()) { 
+                     if (operation.reply() !== undefined) { 
+                     type = 'reply';
+                     } else { 
+                     type = 'receive'; 
+                     } 
+                 } %>
+                <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` Operation`) %>
+                <% if(operation.summary()) { %>
+                    <%- md.render(`*${operation.summary().trim()}*`) %> 
+                <% } %>
+                <% if(showInfoList) { %>
+                    <ul>
+                        <% if(operation.operationId()) { %>
+                            <li>Operation ID: <%= operation.operationId() %></li>
+                            <% if(servers && servers.length) { %>
+                                <li>Available Only on Server:
+                                     <%= servers.map(s => {
+                                        const serverId = s.id();
+                                        const slug = FormatHelpers.slugify(serverId);
+                                        return `[${serverId}](#${slug}-server)`;
+                                        }).join(', ') %>
+                                </li>
+                            <% } %>
+                        <% } %>
+                    </ul>
+                <% } %>
+                <% if(channel.hasDescription()) { %>
+                    <%- md.render(channel.description()) %>
+                <% } %>
+                <% if(operation.hasDescription()) { %>
+                    <%- md.render(operation.description()) %>
+                <% } %>
+                <% if(operation.externalDocs()) { %>
+                      <a href={operation.externalDocs().url()}><%= (operation.externalDocs().description() || 'Find more info here.') %></a>
+                <% } %>
+
+                <%- include(tagsPath,{ name:"Operation tags", tags: operation.tags() }) %>
+
+                <% const parameters = schemaHelper.parametersToSchema(channel.parameters().all()); %>
+                <% if(parameters) { %>
+                    <h4>Parameters</h4>
+                    <%- include(schemaPath,{}) %>
+                <% } %>
+
+                <%- include(securityPath,{ header:'Additional security requirements', protocol: null, security: operation.security(), serverHelper, md }) %>
+
+
+                <%- include(bindingsPath,{ name:"Channel specific information", bindings: channel.bindings(), schemaHelper, schemaPath }) %>
+                <%- include(bindingsPath,{ name:"Operation specific information", bindings: operation.bindings(), schemaHelper, schemaPath }) %>
+                <%- include(extensionsPath,{ name:"Channel extensions", extensions: channel.extensions(), schemaHelper, schemaPath }) %>
+                <%- include(extensionsPath,{ name:"Operation extensions", extensions: operation.extensions(), schemaHelper, schemaPath }) %>
+
+
+                <% const messages = operation.messages().all(); %>
+                <% if (messages.length !== 0) { %>
+                    <% const messageText = getOperationMessageText({type}); %>
+                    <% if(messages.length > 1) { %>
+                        <p><%= messageText %></p>
+                    <% } %>
+                    <% for(let message of messages) { %>
+                        <%- include(messagePath,{message}) %>
+                    <% } %>
+                <% } %>
+
+            <% } %>
+        <% } %>    
+    <% } %>
+<% } %>
+
+
+
+<% function getRenderedTypeForOperation({type}) { 
+   if (isV3) { 
+       switch (type) { 
+       case 'request': 
+        return 'REQUEST';
+       case 'send': 
+        return 'SEND'; 
+       case 'reply': 
+        return 'REPLY'; 
+       case 'receive': 
+        return 'RECEIVE'; 
+       } 
+     } 
+     switch (type) {
+     case 'send':  
+      return 'SUB'; 
+     case 'receive': 
+      return 'PUB'; 
+     } 
+    
+     return 'UNKNOWN'; 
+ } 
+
+ function getOperationMessageText({type}) {
+  let messagesText = 'Accepts **one of** the following messages:';
+  if (isV3) {
+    if (type === 'send') {
+      messagesText = 'Sending **one of** the following messages:';
+    } else if (type === 'request') {
+      messagesText = 'Request contains **one of** the following messages:';
+    } else if (type === 'receive') {
+      messagesText = 'Receive **one of** the following messages:';
+    } else if (type === 'reply') {
+      messagesText = 'Request contains **one of** the following messages:';
+    }
+  }
+  return messagesText;
+ } %>

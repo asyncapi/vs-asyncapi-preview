@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as ejs from 'ejs';
 import * as path from 'path';
 import * as Markdownit from 'markdown-it';
+import { Server } from 'http';
 
 const md = Markdownit('commonmark');
 
@@ -10,6 +11,7 @@ const md = Markdownit('commonmark');
 const extRenderType = 'x-schema-private-render-type';
 const extRenderAdditionalInfo = 'x-schema-private-render-additional-info';
 const extRawValue = 'x-schema-private-raw-value';
+const extParameterLocation = 'x-schema-private-parameter-location';
 const jsonSchemaTypes: string[] = [
   'string',
   'number',
@@ -21,6 +23,30 @@ const jsonSchemaTypes: string[] = [
 ];
 
 class SchemaHelper {
+  static parametersToSchema(parameters: any[]) {
+    if (parameters.length === 0) {
+      return;
+    }
+
+    const json:object = {
+      type: 'object',
+      properties: parameters.reduce(
+        (obj, parameter) => {
+          const parameterName = parameter.id();
+          obj[String(parameterName)] = Object.assign({}, parameter.schema() === undefined ? {type: 'string'} : parameter.schema().json());
+          obj[String(parameterName)].description =
+            parameter.description() || obj[String(parameterName)].description;
+          obj[String(parameterName)][extParameterLocation] = parameter.location();
+          return obj;
+        },
+        {},
+      ),
+      required: parameters.map(parameter => parameter.id()),
+      [extRenderType]: false,
+      [extRenderAdditionalInfo]: false,
+    };
+    return new SchemaModel(json);
+  }
   static jsonFieldToSchema(value: any): object {
     if (value === undefined || value === null) {
       return {
@@ -102,6 +128,96 @@ class SchemaHelper {
   }
 }
 
+class ServerHelper {
+  static securityType(value: string) {
+    switch (value) {
+    case 'apiKey':
+      return 'API key';
+    case 'oauth2':
+      return 'OAuth2';
+    case 'openIdConnect':
+      return 'Open ID';
+    case 'http':
+      return 'HTTP';
+    case 'userPassword':
+      return 'User/Password';
+    case 'X509':
+      return 'X509';
+    case 'symmetricEncryption':
+      return 'Symmetric Encription';
+    case 'asymmetricEncryption':
+      return 'Asymmetric Encription';
+    case 'httpApiKey':
+      return 'HTTP API key';
+    case 'scramSha256':
+      return 'ScramSha256';
+    case 'scramSha512':
+      return 'ScramSha512';
+    case 'gssapi':
+      return 'GSSAPI';
+    case 'plain':
+      return 'PLAIN';
+    default:
+      return 'API key';
+    }
+  }
+
+  static flowName(value: string) {
+    switch (value) {
+    case 'implicit':
+      return 'Implicit';
+    case 'password':
+      return 'Password';
+    case 'clientCredentials':
+      return 'Client credentials';
+    case 'authorizationCode':
+      return 'Authorization Code';
+    default:
+      return 'Implicit';
+    }
+  }
+
+  static getKafkaSecurity(protocol: string, securitySchema: { type: () => any; }) {
+    let securityProtocol;
+    let saslMechanism;
+    if (protocol === 'kafka') {
+      if (securitySchema) {
+        securityProtocol = 'SASL_PLAINTEXT';
+      } else {
+        securityProtocol = 'PLAINTEXT';
+      }
+    } else if (securitySchema) {
+      securityProtocol = 'SASL_SSL';
+    } else {
+      securityProtocol = 'SSL';
+    }
+    if (securitySchema) {
+      switch (securitySchema.type()) {
+      case 'plain':
+        saslMechanism = 'PLAIN';
+        break;
+      case 'scramSha256':
+        saslMechanism = 'SCRAM-SHA-256';
+        break;
+      case 'scramSha512':
+        saslMechanism = 'SCRAM-SHA-512';
+        break;
+      case 'oauth2':
+        saslMechanism = 'OAUTHBEARER';
+        break;
+      case 'gssapi':
+        saslMechanism = 'GSSAPI';
+        break;
+      case 'X509':
+        securityProtocol = 'SSL';
+        break;
+      }
+    }
+
+    return { securityProtocol, saslMechanism };
+  }
+}
+
 
 
 export default async function info(asyncapi:AsyncAPIDocumentInterface, context: vscode.ExtensionContext) {
@@ -128,7 +244,17 @@ export default async function info(asyncapi:AsyncAPIDocumentInterface, context: 
         },
         servers:{
             servers: asyncapi.servers(),
-            schemaHelper: SchemaHelper
+            schemaHelper: SchemaHelper,
+            serverHelper: ServerHelper,
+            md
+        },
+        operations:{
+          channels: asyncapi.channels(),
+          isV3: asyncapi.version().split('.')[0] === '3',
+          schemaHelper: SchemaHelper,
+          serverHelper: ServerHelper,
+          allServersLength: asyncapi.servers().all().length,
+          md
         },
         path:{
             infoPath: path.join(context.extensionPath,'dist', 'components','Info.ejs'),
@@ -137,7 +263,9 @@ export default async function info(asyncapi:AsyncAPIDocumentInterface, context: 
             securityPath: path.join(context.extensionPath,'dist', 'components','Security.ejs'),
             bindingsPath: path.join(context.extensionPath,'dist', 'components','Bindings.ejs'),
             extensionsPath: path.join(context.extensionPath,'dist', 'components','Extensions.ejs'),
-            schemaPath: path.join(context.extensionPath,'dist', 'components','Schema.ejs')
+            schemaPath: path.join(context.extensionPath,'dist', 'components','Schema.ejs'),
+            operationsPath: path.join(context.extensionPath,'dist', 'components','Operations.ejs'),
+            messagePath: path.join(context.extensionPath,'dist', 'components','Message.ejs')
         }
     });
 }  
