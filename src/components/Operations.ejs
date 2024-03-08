@@ -55,26 +55,26 @@
                 <% const parameters = schemaHelper.parametersToSchema(channel.parameters().all()); %>
                 <% if(parameters) { %>
                     <h4>Parameters</h4>
-                    <%- include(schemaPath,{}) %>
+                    <%- include(schemaPath,{ schema: parameters, schemaName: "Parameters", hideTitle: true, schemaHelper, md, path:"" }) %>
                 <% } %>
 
                 <%- include(securityPath,{ header:'Additional security requirements', protocol: null, security: operation.security(), serverHelper, md }) %>
 
 
-                <%- include(bindingsPath,{ name:"Channel specific information", bindings: channel.bindings(), schemaHelper, schemaPath }) %>
-                <%- include(bindingsPath,{ name:"Operation specific information", bindings: operation.bindings(), schemaHelper, schemaPath }) %>
-                <%- include(extensionsPath,{ name:"Channel extensions", extensions: channel.extensions(), schemaHelper, schemaPath }) %>
-                <%- include(extensionsPath,{ name:"Operation extensions", extensions: operation.extensions(), schemaHelper, schemaPath }) %>
+                <%- include(bindingsPath,{ name:"Channel specific information", bindings: channel.bindings(), schemaHelper, schemaPath, md }) %>
+                <%- include(bindingsPath,{ name:"Operation specific information", bindings: operation.bindings(), schemaHelper, schemaPath, md  }) %>
+                <%- include(extensionsPath,{ name:"Channel extensions", extensions: channel.extensions(), schemaHelper, schemaPath, md  }) %>
+                <%- include(extensionsPath,{ name:"Operation extensions", extensions: operation.extensions(), schemaHelper, schemaPath, md  }) %>
 
 
                 <% const messages = operation.messages().all(); %>
                 <% if (messages.length !== 0) { %>
                     <% const messageText = getOperationMessageText({type}); %>
                     <% if(messages.length > 1) { %>
-                        <p><%= messageText %></p>
+                        <p><%- md.render(messageText) %></p>
                     <% } %>
                     <% for(let message of messages) { %>
-                        <%- include(messagePath,{message}) %>
+                        <%- include(messagePath,{message, bindingsPath, extensionsPath, schemaHelper, schemaPath, md, messageHelper}) %>
                     <% } %>
                 <% } %>
 

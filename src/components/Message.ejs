@@ -1,0 +1,109 @@
+<% if (message) { 
+    const messageId = message.id();
+    const headers = message.headers();
+    const payload = message.payload();
+    const correlationId = message.correlationId();
+    const contentType = message.contentType();
+    const externalDocs = message.externalDocs();
+    const showInfoList = contentType || externalDocs;
+
+    let header = 'Message';
+    if (message.title()) {
+        header += ` ${message.title()}`;
+    }
+    const id = message.name() || messageId;
+    if (id) {
+        header += ` <code>${id}</code>`;
+    } %>
+
+    <h4><%- header %></h4>
+
+      <% if(message.summary()) { %>
+          <%- md.render(`*${message.summary()}*`) %>
+      <% } %>
+
+      <% if(showInfoList) { %>
+        <div>
+            <% if(messageId) { %>
+                <li>Message ID: <%= messageId %></li>
+            <% } %>
+          <% if(contentType) { %>
+            <li>
+              Content type: <%- `<a href='https://www.iana.org/assignments/media-types/${contentType}'>${contentType}</a>` %>
+            </li>
+          <% } %>
+          <% if(correlationId) { %>
+            <ul>
+              <li>
+                Correlation ID: <%= correlationId.location() %>
+              </li>
+              <% if(correlationId.hasDescription()) { %>
+                  <br />
+                  <%- md.render(correlationId.description()) %>
+              <% } %>
+            </ul>
+          <% } %>
+        </div>
+    <% } %>
+    <% if(message.hasDescription()) { %>
+        <%- md.render(message.description()) %>
+    <% } %>
+  
+    <% if(externalDocs) { %> 
+        <a href='<%= externalDocs.url() %>'>
+            <%- md.render(externalDocs.description() || 'Find more info here.') %>
+        </a>
+    <% } %>
+  
+    <% if(headers) { %>
+        <h5>Headers</h5>
+        <%- include(schemaPath,{schema:headers,schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
+        <% const ex = messageHelper.getHeadersExamples(message);
+        if (ex) { %>
+            <blockquote>Examples of headers</blockquote>
+            <% if (ex.length !== 0) {
+                    examples.map((e, idx) => { %>
+                    <p><%= e.name && e.name %></p>
+                    <%- e.summary && md.render(e.summary) %>
+                    <code><%= JSON.stringify(e.example, null, 2) %></code>
+                    <% }); %>
+                <% } %>
+        <% }else {
+            const headers = message.headers();
+            if (headers) { %>
+                <blockquote>Examples of headers _generated_</blockquote>
+                <code><%- md.render(messageHelper.generateExample(headers.json())) %></code>
+            <% } %>
+        <% } %> 
+
+    <% } %>
+  
+        <% if(payload) { %>
+            <h5>Payload</h5>
+            <%- include(schemaPath,{schema:payload, schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
+            <% const examples = messageHelper.getPayloadExamples(message);
+            if (examples) { %>
+                    <blockquote>Examples of payload</blockquote>
+                    <% if (examples.length !== 0) {
+                        examples.map((ex, idx) => { %>
+                        <p><%= ex.name && ex.name %></p>
+                        <%- ex.summary && md.render(ex.summary) %>
+                        <code><%= md.render(JSON.stringify(ex.example, null, 2)) %></code>
+                        <% }); %>
+                   <% } %>
+            <% }else { 
+                const payload = message.payload();
+                if (payload) { %>
+                    <blockquote>Examples of payload _generated_</blockquote>
+                    <code><%- md.render(messageHelper.generateExample(payload.json())) %></code>
+                <% } %>
+    
+            <% } %>
+
+        <% } %>
+  
+        <%- include(bindingsPath,{name:"Message specific information", bindings:message.bindings(), schemaHelper, schemaPath}) %>
+        <%- include(extensionsPath,{name:"Message extensions", extensions:message.extensions(), schemaHelper, schemaPath}) %>
+        <%- include(tagsPath,{name:"Message tags", tags:message.tags()}) %>
+<% } %>
+
