@@ -68,6 +68,7 @@ const extensionConfig = {
           from: 'src/components',
           to: 'components'
         } 
+
       ],
     }),
   ],

@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { isAsyncAPIFile } from './PreviewWebPanel';
+
 import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import Asyncapi from './Asyncapi';
 
@@ -10,6 +11,7 @@ const parser = new Parser();
 
 async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, context: vscode.ExtensionContext){
 
+
   let content = '';
 
   if(document !== undefined){
@@ -18,6 +20,7 @@ async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, con
   }
 
   return content;
+
 }
 
 export function previewMarkdown(context: vscode.ExtensionContext) {
@@ -53,6 +56,7 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
 
   const { document } = await fromFile(parser, uri.fsPath).parse();   
   let result =  await buildMarkdown(document, context); 
+
 
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, result);
