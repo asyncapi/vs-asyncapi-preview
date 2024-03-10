@@ -88,7 +88,7 @@
                         examples.map((ex, idx) => { %>
                         <p><%= ex.name && ex.name %></p>
                         <%- ex.summary && md.render(ex.summary) %>
-                        <code><%= md.render(JSON.stringify(ex.example, null, 2)) %></code>
+                        <code><%- md.render(JSON.stringify(ex.example, null, 2)) %></code>
                         <% }); %>
                    <% } %>
             <% }else { 

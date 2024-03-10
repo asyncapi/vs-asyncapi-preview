@@ -35,6 +35,7 @@
                                             <li>OpenID Connect URL: <a href="<%= schema.split('_')[1] %>"><%= schema.split('_')[2] %></a></li>
                                         <% }else if(schema.split('_')[0] == 'RequiredScopes'){ %>
                                             <li>Required Scopes: <%= schema.split('_')[1]? schema.split('_')[1]: 'Nil' %></li>
+                                            <div class="table-container">
                                             <Table>
                                                 <thead>
                                                   <tr>
@@ -48,15 +49,16 @@
                                                 <tbody>
                                                   <% for(let entry of JSON.parse(schema.split('_')[2])){ %>
                                                     <tr>
-                                                      <td><%= entry[0] %></td>
-                                                        <td><a href="<%= entry[1] %>"><%= entry[1] %></a></td>
-                                                        <td><a href="<%= entry[2] %>"><%= entry[2] %></a></td>
-                                                        <td><a href="<%= entry[3] %>"><%= entry[3] %></a></td>
-                                                      <td><%= entry[4] %></td>
+                                                      <td data-th="Flow"><%= entry[0] %></td>
+                                                      <td data-th="Auth URL"><a href="<%= entry[1] %>"><%= entry[1] %></a></td>
+                                                      <td data-th="Token URL"><a href="<%= entry[2] %>"><%= entry[2] %></a></td>
+                                                      <td data-th="Refresh URL"><a href="<%= entry[3] %>"><%= entry[3] %></a></td>
+                                                      <td data-th="Scopes"><%= entry[4] %></td>
                                                     </tr>
                                                   <% } %>
                                                 </tbody>
                                               </Table>
+                                              </div>
                                         <% }else { %>
                                             <li><%= schema %></li>
                                         <% } %>  

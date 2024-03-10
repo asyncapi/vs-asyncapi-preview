@@ -1,5 +1,6 @@
 <% if(tags && !tags.isEmpty()) { %>
   <h5><%= name %></h5>
+  <div class="table-container">
   <Table>
     <thead>
       <tr>
@@ -11,17 +12,17 @@
     <tbody>
       <% for(let entry of tags.all()){ %>
         <tr>
-          <td><%= entry.name() %></td>
-          <td><%= entry.description() %></td>
+          <td data-th="Name"><%= entry.name() %></td>
+          <td data-th="Description"><%= entry.description() %></td>
           <% if(entry.externalDocs()){ %>
-            <td><a href="<%= entry.externalDocs().url() %>" ><%= entry.externalDocs() && entry.externalDocs().hasDescription() ? entry.externalDocs().description() : 'Find more info here' %></a></td>
+            <td data-th="Documentation"><a href="<%= entry.externalDocs().url() %>" ><%= entry.externalDocs() && entry.externalDocs().hasDescription() ? entry.externalDocs().description() : 'Find more info here' %></a></td>
           <% }else { %>
-            <td>-</td>
+            <td data-th="Documentation">-</td>
           <% } %>
         </tr>
       <% } %>
     </tbody>
   </Table>
-
+  </div>
 <% } %>  
   

@@ -13,6 +13,7 @@
                     <% } %>
                 </p>
             <h4>URL Variables</h4>
+            <div class="table-container">
             <Table>
                 <thead>
                   <tr>
@@ -25,23 +26,23 @@
                 <tbody>
                   <% for(let entry of server.variables().all()){ %>
                     <tr>
-                      <td><%= entry.id() %></td>
-                      <td><%= entry.description() %></td>
+                      <td data-th="Name"><%= entry.id() %></td>
+                      <td data-="Description"><%= entry.description() %></td>
                       <% if(entry.hasDefaultValue()){ %>
-                        <td><%= entry.defaultValue() %></td>
+                        <td data-th="Default value"><%= entry.defaultValue() %></td>
                       <% }else { %>
-                        <td>_None_</td>
+                        <td data-th="Default value">_None_</td>
                       <% } %>
                       <% if(entry.hasAllowedValues()){ %>
-                        <td><%= entry.allowedValues().map(value => value).join(', ') %></td>
+                        <td data-th="Allowed values"><%= entry.allowedValues().map(value => value).join(', ') %></td>
                       <% }else { %>
-                        <td>_Any_</td>
+                        <td data-th="Allowed values">_Any_</td>
                       <% } %>
                     </tr>
                   <% } %>
                 </tbody>
               </Table>
-
+              </div>
             <%- include(securityPath,{ header:null, protocol: server.protocol(), security: server.security(), serverHelper, md }) %>
             <%- include(tagsPath,{ name:"Tags", tags: server.tags() }) %>
 
