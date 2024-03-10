@@ -1,27 +1,26 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { isAsyncAPIFile } from './PreviewWebPanel';
-import * as Markdownit from 'markdown-it';
-import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
-import Info from './components/Info';
-import MermaidDiagram from './components/MermaidDiagram';
 
-const md = Markdownit('commonmark');
+import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
+import Asyncapi from './Asyncapi';
+
+
 const parser = new Parser();
 
-function buildMarkdown(document:AsyncAPIDocumentInterface | undefined){
+
+async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, context: vscode.ExtensionContext){
+
 
   let content = '';
 
   if(document !== undefined){
     
-    content = `
-      ${Info(document)}
-      ${MermaidDiagram(document)}
-    `;
+    content = await Asyncapi(document, context);
   }
 
-  return md.render(content);
+  return content;
+
 }
 
 export function previewMarkdown(context: vscode.ExtensionContext) {
@@ -56,7 +55,8 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
     });
 
   const { document } = await fromFile(parser, uri.fsPath).parse();   
-  let result =  buildMarkdown(document); 
+  let result =  await buildMarkdown(document, context); 
+
 
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, result);
@@ -93,25 +93,181 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   <html>
     <head>
       <style> 
-      html{
-        scroll-behavior: smooth;
-      }
-      body {
-        color: #121212;
-        background-color: #fff;
-        word-wrap: break-word;
-      }
-      h1 {
-        color: #121212;
-      }
+        html{
+          scroll-behavior: smooth;
+        }
+        body {
+          color: #121212;
+          background-color: #efefef;
+          word-wrap: break-word;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+        }
+        h1 {
+          color: #121212;
+        }
+        .container {
+          display: flex;
+          overflow-x: hidden;
+        }
+        .section {
+          flex: 0 0 100%;
+          box-sizing: border-box;
+          padding: 20px;
+          aspect-ratio:1;
+          overflow-y: auto;
+          height:calc(100vh - 60px);;
+        }
+        .button-container {
+          display: flex;
+          justify-content: center;
+          margin: 10px;
+        }
+        .button {
+          padding: 10px 20px;
+          margin: 0px 10px;
+          border-radius: .5rem;
+          color: #444;
+          font-size: 1rem;
+          font-weight: 700;
+          letter-spacing: .1rem;
+          cursor: pointer;
+          flex:1;
+          border: none;
+          outline: none;
+          transition: .2s ease-in-out;
+          box-shadow: -6px -6px 14px rgba(255, 255, 255, .7),
+                      -6px -6px 10px rgba(255, 255, 255, .5),
+                      6px 6px 8px rgba(255, 255, 255, .075),
+                      6px 6px 10px rgba(0, 0, 0, .15);
+          }
+          button:hover {
+            box-shadow: -2px -2px 6px rgba(255, 255, 255, .6),
+                        -2px -2px 4px rgba(255, 255, 255, .4),
+                        2px 2px 2px rgba(255, 255, 255, .05),
+                        2px 2px 4px rgba(0, 0, 0, .1);
+          }
+          button:active {
+            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, .7),
+                        inset -2px -2px 4px rgba(255, 255, 255, .5),
+                        inset 2px 2px 2px rgba(255, 255, 255, .075),
+                        inset 2px 2px 4px rgba(0, 0, 0, .15);
+          }
+        .table-container{
+          overflow-x:auto;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        th, td {
+          padding: 12px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+        }
+        th {
+          background-color: black;
+          color: white;
+        }
+        tr:nth-child(even) {
+          background-color: #fefefe;
+        }
+        code {
+          display: block;
+          padding: 10px;
+          background-color: #282c34;
+          color: #abb2bf;
+          border-radius: 5px;
+          margin-bottom: 20px;
+          margin-top: 20px;
+          white-space: pre-wrap;
+        }
+        blockquote {
+          border-left: 4px solid #61dafb;
+          margin: 0;
+          margin-top: 20px;
+          padding: 10px 20px;
+          background-color: #fff;
+          color: #333;
+        }
+        a {
+          text-decoration: none;
+          color: #3498db;
+          font-weight: bold;
+          transition: color 0.3s ease-in-out;
+        }
+        a:hover {
+          color: #1abc9c;
+        }
+    
+        @media screen and (max-width: 600px) {
+          table {
+            display: block;
+          }
+    
+          thead, tbody, th, td, tr {
+            display: block;
+          }
+    
+          th {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+          }
+    
+          td {
+            border: none;
+            position: relative;
+            padding-left: 50%;
+            white-space: nowrap;
+          }
+    
+          td:before {
+            position: absolute;
+            top: 12px;
+            left: 6px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            content: attr(data-th) ": ";
+            font-weight: bold;
+          }
+          code {
+            font-size: 14px;
+          }
+    
+          blockquote {
+            font-size: 16px;
+          }
+        }
       </style>
     </head>
     <body x-timestamp="${Date.now()}">
+
+      <div class="container">
+        <div class="section" id="section1">${result}</div>
+        <div class="section" id="section2">Section 2</div>
+        <div class="section" id="section3">Section 3</div>
+      </div>
+
+      <div class="button-container">
+        <button class="button" onclick="moveToSection('section1')">Markdown</button>
+        <button class="button" onclick="moveToSection('section2')">Flowchart</button>
+        <button class="button" onclick="moveToSection('section3')">Class Diagram</button>
+      </div>
       
-      ${result}
+      
       <script src="${mermaidJs}"></script>
       <script>
         mermaid.initialize({ startOnLoad: true });  
+        function moveToSection(sectionId) {
+          const sectionElement = document.getElementById(sectionId);
+          sectionElement.scrollIntoView({ behavior: 'smooth' });
+        }
       </script>
   
     </body>

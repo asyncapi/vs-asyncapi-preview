@@ -1,0 +1,55 @@
+<h1><%= title %> <%= version %> documentation</h1>
+<% if(extensions && extensions.has('x-logo')) { %>
+    <img src="<%= (extensions.get('x-logo').value()) %>" alt=" logo" />
+<% } %>
+<ul>
+    <%  if (specId) { %>
+        <li>
+            Specification ID: <%= specId %>
+        </li>
+        <% } %>
+        <%  if (license) { %>
+            <% if (license.url()) { %>
+                <li>
+                    License: <a href="<%= license.url() %>"> <%= license.name() %> </a>
+                </li>
+            <% }else { %>
+                <li>
+                    License: <a href="#"> <%= license.name() %> </a>
+                </li>
+            <% } %>   
+        <% } %>  
+        <%  if (termsOfService) { %>
+            <li>
+                Terms of service: <%= termsOfService %>
+            </li>
+        <% } %>
+        <%  if (defaultContentType) { %>
+            <li>
+                Default content type: <a href="https://www.iana.org/assignments/media-types/<%= defaultContentType %>"> <%= defaultContentType %> </a>
+            </li>
+        <% } %>
+        <%  if (contact) { %>
+            <%  if (contact.url()) { %>
+                <li>
+                    Support: <a href="<%= contact.url() %>"> <%= contact.name() || 'Link' %> </a>
+                </li>
+            <% } %>
+            <%  if (contact.email()) { %>
+                <li>
+                    Email support: <a href="<%= contact.email() %>"> <%= contact.email() %> </a>
+                </li>
+            <% } %>
+        <% } %>
+   
+</ul>
+
+<% if(externalDocs) { %>
+    <a href="<%= externalDocs.url() %>"> <%= externalDocs.description() || 'Find more info here.' %> </a>
+<% } %>
+
+<% if(hasDescription) { %>
+      <%- description %>
+<% } %>
+
+<%- include(tagsPath,{ name:"Specification Tags", tags }) %>

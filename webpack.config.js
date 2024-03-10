@@ -3,7 +3,7 @@
 'use strict';
 
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
+const copyPlugin = require('copy-webpack-plugin');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -39,6 +39,10 @@ const extensionConfig = {
           },
         ],
       },
+      {
+        test: /\.ejs$/,
+        loader: 'ejs-loader'
+      }
     ],
   },
   devtool: 'nosources-source-map',
@@ -46,7 +50,7 @@ const extensionConfig = {
     level: 'log', // enables logging required for problem matchers
   },
   plugins: [
-    new CopyPlugin({
+    new copyPlugin({
       patterns: [
         {
           from: 'node_modules/@asyncapi/react-component/browser/standalone/index.js',
@@ -57,9 +61,14 @@ const extensionConfig = {
           to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
         },
         {
-          from: '/node_modules/mermaid/dist/mermaid.min.js',
-          to: '/node_modules/mermaid/dist/mermaid.min.js',
+          from: 'node_modules/mermaid/dist/mermaid.min.js',
+          to: 'node_modules/mermaid/dist/mermaid.min.js',
         },
+        {
+          from: 'src/components',
+          to: 'components'
+        } 
+
       ],
     }),
   ],

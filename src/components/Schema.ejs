@@ -1,0 +1,421 @@
+<% if(schemaName && hideTitle === false ) { %>
+    <h4><%= schemaName %></h4>
+<% } %>
+<div class="table-container">
+<Table>
+  <thead>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Constraints</th>
+        <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if ( schema && !(schemaName.indexOf('x-parser-')> -1 || schemaName.indexOf('x-schema-private-') > -1) ) {
+        const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema, schemaName, 'root'); %>
+          <tr>
+              <td data-th="Name"><%- (renderedName || '-') %> </td>
+              <td data-th="Type"><%- (schemaType || '-') %></td>
+              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+              <td data-th="Value"><%- (values || '-') %></td>
+              <td data-th="Constraints"><%- (constraints || '-') %></td>
+              <td data-th="Notes"><%- (notes || '-') %></td>
+          </tr>
+          <% const dependentSchemas = schemaHelper.getDependentSchemas(schema);
+          const extensions = schemaHelper.getCustomExtensions(schema);
+          const extensionsSchema = (extensions || Object.keys(extensions).length)? schemaHelper.jsonToSchema(extensions) : null;
+          const properties = schema.properties() || {};
+          if (Object.keys(properties)) { 
+            const required = schema.required() || [];
+            const patternProperties = schema.patternProperties() || {}; 
+            for(let [propertyName, property] of Object.entries(properties) ) { %>
+                <% if ( property && !(propertyName.indexOf('x-parser-')> -1 || propertyName.indexOf('x-schema-private-') > -1) ) {
+                    const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(property, propertyName, required.includes(propertyName), schemaHelper.getDependentRequired(propertyName,schema), buildPath((path || schemaName), propertyName)); %>
+                    <tr>
+                        <td data-th="Name"><%- (renderedName || '-') %> </td>
+                        <td data-th="Type"><%- (schemaType || '-') %></td>
+                        <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                        <td data-th="Value"><%- (values || '-') %></td>
+                        <td data-th="Constraints"><%- (constraints || '-') %></td>
+                        <td data-th="Notes"><%- (notes || '-') %></td>
+                    </tr>
+                    <% } %>
+            <% } %>
+            <% for(let [propertyName, property] of Object.entries(patternProperties) ) { %>
+                <% if ( property && !(propertyName.indexOf('x-parser-')> -1 || propertyName.indexOf('x-schema-private-') > -1) ) {
+                    const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(property, propertyName, false, [], buildPath((path || schemaName), propertyName), 'pattern property'); %>
+                    <tr>
+                        <td data-th="Name"><%- (renderedName || '-') %> </td>
+                        <td data-th="Type"><%- (schemaType || '-') %></td>
+                        <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                        <td data-th="Value"><%- (values || '-') %></td>
+                        <td data-th="Constraints"><%- (constraints || '-') %></td>
+                        <td><%- (notes || '-') %></td>
+                    </tr>
+                <% } %>
+            <% } %>
+
+            <% const type = schema.type();
+            const types = Array.isArray(type) ? type : [type];
+            if (!(type !== undefined && !types.includes('array'))) { 
+              const items = schema.items();
+              if (items && !Array.isArray(items) && Object.keys(items.properties() || {}).length) {
+                const properties = items.properties() || {};
+                if (Object.keys(properties)) { 
+                  const required = items.required() || [];
+                  const patternProperties = items.patternProperties() || {}; 
+                  for(let [propertyName, property] of Object.entries(properties) ) { %>
+                      <% if ( property && !(propertyName.indexOf('x-parser-')> -1 || propertyName.indexOf('x-schema-private-') > -1) ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(property, propertyName, required.includes(propertyName), schemaHelper.getDependentRequired(propertyName,items), buildPath((path || ""), propertyName)); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+                          <% } %>
+                  <% } %>
+                  <% for(let [propertyName, property] of Object.entries(patternProperties) ) { %>
+                      <% if ( property && !(propertyName.indexOf('x-parser-')> -1 || propertyName.indexOf('x-schema-private-') > -1) ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(property, propertyName, false, [], path, 'Single Item'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+                      <% } %>
+                  <% } %>
+                  <% } %>
+              <% } else if (Array.isArray(items)) { %>
+
+                <% items.map((item, idx) => {
+                   if ( item ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(item, "", false, [], buildPath(path || "", idx), 'index'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+                      <% } %>
+                  <% }) %>
+            
+              <% }else { %>
+                <% if ( items ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(items, "", false, [], path, 'Single Item'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+                <% } %>
+              <% } %>
+              
+            <% } %>
+
+          <% } %> 
+          <% schema.oneOf() && schema.oneOf().map((s, idx) => { 
+             if ( s && !(idx.indexOf('x-parser-')> -1 || idx.indexOf('x-schema-private-') > -1) ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(s, idx, false, [], buildPath(path || schemaName, idx), 'oneOf item'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+              <% } %>
+          <% }) %>
+          <% schema.anyOf() && schema.anyOf().map((s, idx) => { 
+             if ( s && !(idx.indexOf('x-parser-')> -1 || idx.indexOf('x-schema-private-') > -1) ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(s, idx, false, [], buildPath(path || schemaName, idx), 'anyOf item'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+          <% }) %>
+          <% schema.allOf() && schema.allOf().map((s, idx) => {
+             if ( s && !(idx.indexOf('x-parser-')> -1 || idx.indexOf('x-schema-private-') > -1) ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(s, idx, false, [], buildPath(path || schemaName, idx), 'allOf item'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+          <% }) %>
+            <% if ( schema.not() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.not(), "", false, [], path,'not', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( schema.propertyNames() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.propertyNames(), "", false, [], path,'property names', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( schema.contains() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.contains(), "", false, [], path,'contains', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( schema.if() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.if(), "", false, [], path,'if', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( schema.then() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.then(), "", false, [], path,'then', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( schema.else() ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(schema.else(), "", false, [], path,'else', false); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( dependentSchemas ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(dependentSchemas, "", false, [], path,'dependant schemas'); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% if ( extensionsSchema ) {
+                          const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(extensionsSchema, "", false, [], path); %>
+                          <tr>
+                              <td data-th="Name"><%- (renderedName || '-') %> </td>
+                              <td data-th="Type"><%- (schemaType || '-') %></td>
+                              <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                              <td data-th="Value"><%- (values || '-') %></td>
+                              <td data-th="Constraints"><%- (constraints || '-') %></td>
+                              <td data-th="Notes"><%- (notes || '-') %></td>
+                          </tr>
+            <% } %>
+            <% const ext = schema.extensions();
+              if (ext.get('x-schema-private-render-additional-info')?.value() === true) {
+                const type = schema.type();
+                const types = Array.isArray(type) ? type : [type];
+                if (!(type !== undefined && !types.includes('object'))) {
+                  const additionalProperties = schema.additionalProperties();
+                  if (!(additionalProperties === true || additionalProperties === undefined || additionalProperties === false)) {
+                     if ( additionalProperties ) {
+                        const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(additionalProperties, "", false, [], path,'additional properties', false); %>
+                        <tr>
+                            <td data-th="Name"><%- (renderedName || '-') %> </td>
+                            <td data-th="Type"><%- (schemaType || '-') %></td>
+                            <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                            <td data-th="Value"><%- (values || '-') %></td>
+                            <td data-th="Constraints"><%- (constraints || '-') %></td>
+                            <td data-th="Notes"><%- (notes || '-') %></td>
+                        </tr>
+                    <% } %>
+                 <% } %>
+               <% } %>
+            <% } %>
+            <% if (ext.get('x-schema-private-render-additional-info')?.value() === true) {
+                const type = schema.type();
+                const types = Array.isArray(type) ? type : [type];
+                if (!(type !== undefined && !types.includes('array'))) {
+                  if (Array.isArray(schema.items())) {
+                    const additionalItems = schema.additionalItems();
+                    if (!(additionalItems === true || additionalItems === undefined || additionalItems === false)) {
+                       if ( additionalItems ) {
+                        const [renderedName, schemaType, description, values, constraints, notes] = schemaPropRow(additionalItems, "", false, [], path,'additional items', false); %>
+                        <tr>
+                            <td data-th="Name"> <%- (renderedName || '-') %> </td>
+                            <td data-th="Type"><%- (schemaType || '-') %></td>
+                            <td data-th="Description"><%- (md.render(description) || '-') %></td>
+                            <td data-th="Value"><%- (values || '-') %></td>
+                            <td data-th="Constraints"><%- (constraints || '-') %></td>
+                            <td data-th="Notes"><%- (notes || '-') %></td>
+                        </tr>
+                    <% } %>
+                   <% } %>
+                 <% } %>
+              <% } %>
+            <% } %>               
+                      
+<% } %>
+  </tbody>
+</Table>
+</div>
+<% function schemaPropRow( schema, schemaName, required = false, dependentRequired = [], path = '', nameNote = '',tryRenderAdditionalNotes = true) {
+    const isCircular = schema.isCircular() || false;
+    const extensions = schema.extensions();
+    const renderType = extensions.get('x-schema-private-render-type')?.value() !== false;
+    const rawValue = extensions.get('x-schema-private-raw-value')?.value() === true;
+    const name = tree(path) || schemaName;
+    const schemaType = renderType && schemaHelper.toSchemaType(schema);
+    let description = (schema.description() || '').replace(new RegExp('\S*\r?\n','g'), ' ');
+    const externalDocs = schema.externalDocs();
+    description = externalDocs ? `${!description.endsWith('.') ? `${description}.` : description} [${externalDocs.description() || 'Documentation'}](${externalDocs.url()})` : description;
+    description = description.trim();
+    const values = rawValue ? `\`${schemaHelper.prettifyValue(schema.const())}\`` : schemaValues(schema);
+    const constraints = schemaConstraints(schema);
+    const notes = schemaNotes({ schema, required, dependentRequired, isCircular, tryRenderAdditionalNotes });
+    
+    let renderedName = '';
+    if (nameNote) {
+        renderedName = name ? `${name} (${nameNote})` : `(${nameNote})`;
+    } else {
+        renderedName = name;
+    }
+    return [renderedName, schemaType, description, values, constraints, notes];        
+} 
+
+function tree(path = '') {
+  path = String(path);
+  const filteredPaths = path.split('.').filter(Boolean);
+  return filteredPaths.join('.');
+}
+
+function buildPath(path = '', field = '') {
+  console.log(path,field);
+  if (!path) return field;
+  return `${path}.${field}`;
+}
+
+function schemaValues(schema) {
+  if (!schema) return null;
+  const values = [];
+
+  if (schema.default()) values.push(`default (\`${schemaHelper.prettifyValue(schema.default())}\`)`);
+  if (schema.const()) values.push(`const (\`${schemaHelper.prettifyValue(schema.const())}\`)`);
+  if (schema.enum()) {
+    const allowed = schema.enum().map(v => `\`${schemaHelper.prettifyValue(v)}\``).join(', ');
+    values.push(`allowed (${allowed})`);
+  }
+  if (schema.examples()) {
+    const examples = schema.examples().map(v => `\`${schemaHelper.prettifyValue(v)}\``).join(', ');
+    values.push(`examples (${examples})`);
+  }
+
+  return values.join(', ');
+}
+
+function schemaConstraints(schema) {
+  if (!schema) return null;
+  const constraints = [];
+
+  if (schema.format()) constraints.push(`format (\`${schema.format()}\`)`);
+  if (schema.pattern()) constraints.push(`pattern (\`${schema.pattern()}\`)`);
+  if (schema.contentMediaType()) constraints.push(`media type (\`${schema.contentMediaType()}\`)`);
+  if (schema.contentEncoding()) constraints.push(`encoding (\`${schema.contentEncoding()}\`)`);
+
+  return constraints.concat(schemaHelper.humanizeConstraints(schema)).join(', ');
+}
+
+function schemaNotes({ schema, required = false, dependentRequired = [], isCircular = false, tryRenderAdditionalNotes }) {
+  if (!schema) return null;
+  const notes = [];
+
+  if (schema.deprecated()) notes.push('<b>deprecated</b>');
+
+  if (required) notes.push('<b>required</b>');
+  if (dependentRequired.length) {
+    const deps = dependentRequired.map(v => `\`${v}\``).join(', ');
+    notes.push(`<b>required when defined (${deps})</b>`);
+  }
+  const extensions = schema.extensions();
+  const parameterLocation = extensions.get('x-schema-private-parameter-location');
+  if (parameterLocation?.value()) {
+    notes.push(`<b>parameter location (${parameterLocation.value()})</b>`);
+  }
+
+  if (isCircular) notes.push('<b>circular</b>');
+  if (schema.writeOnly()) notes.push('<b>write-only</b>');
+  if (schema.readOnly()) notes.push('<b>read-only</b>');
+  if (extensions.get('x-schema-private-render-additional-info')?.value() !== false) {
+    const type = schema.type();
+    const types = Array.isArray(type) ? type : [type];
+    if (
+      (type === undefined && tryRenderAdditionalNotes) ||
+      types.includes('object')
+    ) {
+      const additionalProperties = schema.additionalProperties();
+      if (additionalProperties === true || additionalProperties === undefined) {
+        notes.push('<b>additional properties are allowed</b>');
+      } else if (additionalProperties === false) {
+        notes.push('<b>additional properties are NOT allowed</b>');
+      }
+    }
+    if (
+      (
+        (type === undefined && tryRenderAdditionalNotes) ||
+        types.includes('array')
+      ) && 
+      Array.isArray(schema.items())
+    ) {
+      const additionalItems = schema.additionalItems();
+      if (additionalItems === true || additionalItems === undefined) {
+        notes.push('<b>additional items are allowed</b>');
+      } else if (additionalItems === false) {
+        notes.push('<b>additional items are NOT allowed</b>');
+      }
+    }
+  }
+  return notes.join(', ');
+} %>

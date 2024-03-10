@@ -125,6 +125,7 @@
   },
   "devDependencies": {
     "@asyncapi/react-component": "^1.2.7",
+    "@types/ejs": "^3.1.5",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
@@ -146,7 +147,9 @@
   },
   "dependencies": {
     "@asyncapi/parser": "^3.0.7",
+    "ejs": "^3.1.9",
+    "markdown-it": "^14.0.0",
+    "mermaid": "^10.8.0"
     "@types/markdown-it": "^13.0.7",
-    "markdown-it": "^14.0.0"
   }
 }
