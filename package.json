@@ -106,6 +106,7 @@
     "@asyncapi/react-component": "^1.2.7",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
+    "@types/jsonpath": "^0.2.4",
     "@types/mocha": "^9.1.1",
     "@types/node": "14.x",
     "@types/vscode": "^1.66.0",
@@ -122,5 +123,10 @@
     "typescript": "^4.6.4",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "jsonpath": "^1.1.1",
+    "jsonpath-plus": "^8.1.0"
   }
 }
