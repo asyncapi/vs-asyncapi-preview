@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
-import autoFixProvider from './AutoFixProvider';
+import { autoFixProvider } from './AutoFixProvider';
 
 
 export function activate(context: vscode.ExtensionContext) {

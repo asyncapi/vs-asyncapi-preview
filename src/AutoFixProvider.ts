@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as yaml from 'js-yaml';
-import * as fs from 'fs';
 import performFix from './performFix';
 import ruleset from "./ruleset/asyncapi-rules";
+
+interface FixFunction {
+    (document: vscode.TextDocument, range: vscode.Range, given: string, field: string): any; // Consider defining a more specific return type than 'any'
+}
 
 interface Rule {
     description: string;
@@ -14,76 +16,72 @@ interface Rule {
         function: string;
     };
     fix: {
+        name: string;
+        given: string;
         field: string;
-        function: any; // Replace 'any' with the actual type for the function
+        function: FixFunction;
     };
 }
 
 interface RuleSet {
-    rules: {
-        [key: string]: Rule;
-    };
+    rules: Record<string, Rule>;
 }
 
-export function activate(context: vscode.ExtensionContext) {
-    // Register code action provider
+export function activate(context: vscode.ExtensionContext): void {
     const codeActionProvider = new DiagnosticFixProvider();
     context.subscriptions.push(
-        vscode.languages.registerCodeActionsProvider({ scheme: 'file', language: 'yaml' }, codeActionProvider)
+        vscode.languages.registerCodeActionsProvider(
+            { scheme: 'file', language: 'yaml' },
+            codeActionProvider
+        )
     );
 }
 
-export default class DiagnosticFixProvider implements vscode.CodeActionProvider {
-
-    constructor() {
-        // Load quick fixes from external YAML file
-        // const yamlFilePath = path.join(__dirname, '../src/quickfixes.yaml');
-        // const yamlContent = fs.readFileSync(yamlFilePath, 'utf8');
-        // this.quickFixes = yaml.load(yamlContent) as QuickFixData;
-    }
-
-    provideCodeActions(
+class DiagnosticFixProvider implements vscode.CodeActionProvider {
+    public provideCodeActions(
         document: vscode.TextDocument,
         range: vscode.Range,
         context: vscode.CodeActionContext
     ): vscode.CodeAction[] | undefined {
         const codeActions: vscode.CodeAction[] = [];
 
-        // Check if the file is YAML or YML
-        const extension = path.extname(document.fileName);
-        if (extension !== '.yaml' && extension !== '.yml') {
-            return codeActions;
+        if (!this.isFileYAML(document.fileName)) {
+            return;
         }
 
-        for (const diagnostic of context.diagnostics) {
-            if ((diagnostic.code as string | number) in ruleset.rules) {
-                console.log("Diagnostics: ", diagnostic);
-                const code = typeof diagnostic.code === 'number' ? diagnostic.code.toString() : diagnostic.code;
-                const rule: Rule = ruleset.rules[code];
-                // Perform the fix
-                if (rule) {
-                    const fix = rule.fix;
-                    const fixName = fix.name;
-                    // console.log("Fix function: ", fix.function)
-                    const quickFixObj = fix.function(document, range, fix.given, fix.field);
-                    console.log("Quickfix obj: ", quickFixObj);
-                    const action = performFix(document, range, fixName, quickFixObj);
-                    console.log("performFix returned");
-                    if (action) {
-                        console.log("Action added");
-                        codeActions.push(action);
-                    }
+        context.diagnostics.forEach(diagnostic => {
+            const rule = this.getRuleFromDiagnostic(diagnostic);
+            if (rule) {
+                const fixAction = this.createFixAction(document, range, rule);
+                if (fixAction) {
+                    codeActions.push(fixAction);
                 }
-
-
             }
-        }
+        });
 
-        console.log("code actions: ", codeActions);
         return codeActions;
+    }
+
+    private isFileYAML(fileName: string): boolean {
+        const extension = path.extname(fileName).toLowerCase();
+        return extension === '.yaml' || extension === '.yml';
+    }
+
+    private getRuleFromDiagnostic(diagnostic: vscode.Diagnostic): Rule | undefined {
+        const code = typeof diagnostic.code === 'number' ? diagnostic.code.toString() : diagnostic.code;
+        return ruleset.rules[code];
+    }
+
+    private createFixAction(
+        document: vscode.TextDocument,
+        range: vscode.Range,
+        rule: Rule
+    ): vscode.CodeAction | undefined {
+        const { fix } = rule;
+        const given = fix.given;
+        const quickFixObj = fix.function(document, range, given, fix.field);
+        return performFix(document, range, fix.name, quickFixObj);
     }
 }
 
-export { DiagnosticFixProvider as autofixProvider };
-
-
+export { DiagnosticFixProvider as autoFixProvider };
