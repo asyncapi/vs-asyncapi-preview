@@ -72,6 +72,7 @@ const extensionConfig = {
           from:'src/globals.css',
           to:'globals.css'
         } 
+
       ],
     }),
   ],
