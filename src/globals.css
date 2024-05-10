@@ -1,0 +1,227 @@
+html{
+    scroll-behavior: smooth;
+}
+body {
+  color: #121212;
+  background-color: #efefef;
+  word-wrap: break-word;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+h1 {
+  color: #121212;
+}
+.container {
+  display: flex;
+  overflow-x: hidden;
+}
+.section {
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  padding: 20px;
+  aspect-ratio: 1;
+  overflow-y: auto;
+  height:calc(100vh - 60px);;
+}
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
+}
+.button {
+  padding: 10px 20px;
+  margin: 0px 10px;
+  border-radius: .5rem;
+  color: #444;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .1rem;
+  cursor: pointer;
+  flex:1;
+  border: none;
+  outline: none;
+  transition: .2s ease-in-out;
+  box-shadow: -6px -6px 14px rgba(255, 255, 255, .7),
+                -6px -6px 10px rgba(255, 255, 255, .5),
+                6px 6px 8px rgba(255, 255, 255, .075),
+                6px 6px 10px rgba(0, 0, 0, .15);
+}
+button:hover {
+  box-shadow: -2px -2px 6px rgba(255, 255, 255, .6),
+                  -2px -2px 4px rgba(255, 255, 255, .4),
+                  2px 2px 2px rgba(255, 255, 255, .05),
+                  2px 2px 4px rgba(0, 0, 0, .1);
+}
+button:active {
+  box-shadow: inset -2px -2px 6px rgba(255, 255, 255, .7),
+                  inset -2px -2px 4px rgba(255, 255, 255, .5),
+                  inset 2px 2px 2px rgba(255, 255, 255, .075),
+                  inset 2px 2px 4px rgba(0, 0, 0, .15);
+}
+.table-container{
+  overflow-x:auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+th {
+  background-color: black;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #fefefe;
+}
+code {
+  display: block;
+  padding: 10px;
+  background-color: #282c34;
+  color: #abb2bf;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+  white-space: pre-wrap;
+}
+blockquote {
+  border-left: 4px solid #61dafb;
+  margin: 0;
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #fff;
+  color: #333;
+}
+a {
+  text-decoration: none;
+  color: #3498db;
+  font-weight: bold;
+  transition: color 0.3s ease-in-out;
+}
+a:hover {
+  color: #1abc9c;
+}
+
+@media screen and (max-width: 600px) {
+  table {
+    display: block;
+  }
+
+  thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  th {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  td {
+    border: none;
+    position: relative;
+    padding-left: 50%;
+    white-space: nowrap;
+  }
+
+  td:before {
+    position: absolute;
+    top: 12px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    content: attr(data-th) ": ";
+    font-weight: bold;
+  }
+  code {
+    font-size: 14px;
+  }
+
+  blockquote {
+    font-size: 16px;
+  }
+}
+
+.diagnostic {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  box-shadow: 5px 5px 15px #bcbcbc, -5px -5px 15px #ffffff;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  overflow: hidden;
+}
+
+.diagnostic:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 7px 7px 20px #bcbcbc, -7px -7px 20px #ffffff;
+}
+
+.left-bar {
+  width: 10px;
+  border-radius: 10px 0 0 10px;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 20px;
+}
+
+.high {
+  background-color: #e74c3c;
+}
+.medium {
+  background-color: #d9720b;
+}
+.low {
+  background-color: #ebe80a;
+}
+.hint{
+  background-color: #119adf;
+}
+
+.content-box {
+  flex-grow: 1;
+}
+
+.message {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.secondary-text {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.icon {
+  font-size: 24px;
+  color: #e74c3c;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.code {
+  font-family: monospace;
+  white-space: pre-wrap;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.source {
+  font-style: italic;
+  color: #999;
+  margin-top: 10px;
+}

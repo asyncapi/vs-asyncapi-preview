@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import * as ejs from 'ejs';
 import * as path from 'path';
 import * as Markdownit from 'markdown-it';
-import { Server } from 'http';
 import { sample } from 'openapi-sampler';
 
 const md = Markdownit('commonmark');
@@ -609,7 +608,7 @@ class MessageHelper {
   }
 }
 
-export default async function info(asyncapi:AsyncAPIDocumentInterface, context: vscode.ExtensionContext) {
+export default async function asyncapiMarkdown(asyncapi:AsyncAPIDocumentInterface, context: vscode.ExtensionContext) {
     
     
     const info = asyncapi.info();
