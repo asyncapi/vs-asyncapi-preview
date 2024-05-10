@@ -1,0 +1,21 @@
+<h3> Error Loading Preview </h3>
+<% data.forEach(diagnostic => { %>
+    <div class="diagnostic">
+        <% if(diagnostic.severity == 0) { %>  
+            <div class="left-bar high"></div>
+        <% } else if(diagnostic.severity == 1) { %>
+            <div class="left-bar medium"></div>
+        <% }else if(diagnostic.severity == 2) { %>
+            <div class="left-bar low"></div>
+        <% }else if(diagnostic.severity == 3) { %> 
+            <div class="left-bar hint"></div>
+        <% } %>       
+        <div class="content-box">
+            <h2 class="message"><span class="icon">⚠️</span><%= diagnostic.message %></h2>
+            <p class="secondary-text"><%= diagnostic.path %></p>
+            <pre class="code"><%= diagnostic.code %></pre>
+            <p class="source">Source: <%= diagnostic.source %></p>
+            <p class="severity">Severity: <%= diagnostic.severity %></p>
+        </div>
+    </div>
+<% }) %>
