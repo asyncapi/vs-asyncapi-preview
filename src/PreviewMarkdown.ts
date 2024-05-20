@@ -1,27 +1,70 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { isAsyncAPIFile } from './PreviewWebPanel';
+import Diagnostics from './Diagnostics';
 import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
 import Asyncapi from './Asyncapi';
 import { ISpectralDiagnostic } from '@stoplight/spectral-core';
-import Diagnostics from './Diagnostics';
+import { parse } from 'yaml';
+
+function delay(ms: number | undefined) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+ function parsedAsyncapiPreview(){
+  const editor: any = vscode.window.activeTextEditor;
+    if(!editor) {return;}
+    const document = editor.document;
+    const filePath: any = document?.fileName;
+    const fullPath = path.resolve(filePath);
+    const content = fs.readFileSync(fullPath, 'utf8');
+
+    let parsedData;
+    if (filePath.endsWith('.json')) {
+      parsedData = JSON.parse(content);
+    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+      parsedData = parse(content);
+    } else {
+      vscode.window.showInformationMessage('Unsupported file type.');
+      return;
+    }
+
+    return parsedData;
+}
 
 
 const parser = new Parser();
 
 
-async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, diagnostics: ISpectralDiagnostic[], context: vscode.ExtensionContext){
+async function buildMarkdown(document: any, diagnostics: ISpectralDiagnostic[], context: vscode.ExtensionContext){
+
 
   let content = '';
 
   if(document !== undefined){
-    
+    vscode.window.onDidChangeActiveTextEditor(()=>null);
+    document.isAsyncapiParser = true;
     content = await Asyncapi(document, context);
   }else{
     content = await Diagnostics(diagnostics, context);
+    vscode.window.onDidChangeActiveTextEditor(async()=>{
+      
+      let parsedData: any = parsedAsyncapiPreview();
+      if(parsedData){
+        parsedData.isAsyncapiParser = false;
+        content += await Asyncapi(parsedData, context);
+      }
+    });
+    let parsedData: any = parsedAsyncapiPreview();
+    if(parsedData){
+      parsedData.isAsyncapiParser = false;
+      content += await Asyncapi(parsedData, context);
+    }
   }
 
   return content;
+
 }
 
 export function previewMarkdown(context: vscode.ExtensionContext) {
@@ -56,9 +99,9 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
       localResourceRoots,
     });
 
-  const { document, diagnostics } = await fromFile(parser, uri.fsPath).parse(); 
-  console.log(diagnostics);  
+  const { document, diagnostics } = await fromFile(parser, uri.fsPath).parse();   
   let result =  await buildMarkdown(document, diagnostics, context); 
+
 
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, result);
@@ -89,7 +132,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   const mermaidJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/mermaid/dist/mermaid.min.js')
   );
-  const globalsCss = webview.asWebviewUri(
+  const globalsCSS = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/globals.css')
   );
 
@@ -97,7 +140,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   <!DOCTYPE html>
   <html>
     <head>
-      <link rel="stylesheet" href="${globalsCss}"/>
+      <link rel="stylesheet" href="${globalsCSS}"/>
     </head>
     <body x-timestamp="${Date.now()}">
 

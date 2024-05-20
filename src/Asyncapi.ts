@@ -4,6 +4,8 @@ import * as ejs from 'ejs';
 import * as path from 'path';
 import * as Markdownit from 'markdown-it';
 import { sample } from 'openapi-sampler';
+import { description, hasDescription } from '@asyncapi/parser/esm/old-api/mixins';
+import { bindings } from '@asyncapi/parser/esm/models/v3/mixins';
 
 const md = Markdownit('commonmark');
 
@@ -22,7 +24,6 @@ const jsonSchemaTypes: string[] = [
   'null',
 ];
 
-const RESTRICTED_ANY = 'restricted any';
 const NEVER = 'never';
 const UNKNOWN = 'unknown';
 const ANY = 'any';
@@ -318,7 +319,7 @@ class SchemaHelper {
       return;
     }
 
-    for (const [prop, array] of Object.entries(dependencies)) {
+    for (const [prop, array] of Object.entries(dependencies || {})) {
       if (Array.isArray(array) && array.includes(propertyName)) {
         dependentRequired.push(prop);
       }
@@ -333,7 +334,7 @@ class SchemaHelper {
     }
 
     const records:any = {};
-    for (const [prop, propSchema] of Object.entries(dependencies)) {
+    for (const [prop, propSchema] of Object.entries(dependencies || {})) {
       if (typeof propSchema === 'object' && !Array.isArray(propSchema)) {
         records[String(prop)] = propSchema;
       }
@@ -344,7 +345,7 @@ class SchemaHelper {
 
     const json:object = {
       type: 'object',
-      properties: Object.entries(records).reduce(
+      properties: Object.entries(records || {}).reduce(
         (obj:any, [propertyName, propertySchema]:any[]) => {
           obj[String(propertyName)] = Object.assign({}, propertySchema.json());
           return obj;
@@ -413,7 +414,7 @@ class SchemaHelper {
     }
     return {
       type: 'object',
-      properties: Object.entries(value).reduce((obj:any, [k, v]) => {
+      properties: Object.entries(value || {}).reduce((obj:any, [k, v]) => {
         obj[String(k)] = this.jsonFieldToSchema(v);
         return obj;
       }, {}),
@@ -608,12 +609,446 @@ class MessageHelper {
   }
 }
 
-export default async function asyncapiMarkdown(asyncapi:AsyncAPIDocumentInterface, context: vscode.ExtensionContext) {
+function addServers(asyncapi: any){
+  return {
+    isEmpty: ()=> (asyncapi.servers)? false : true,
+    all: ()=>{
+      return Object.entries(asyncapi.servers || {}).map((server: any)=>{
+        return{
+          id: ()=> server[0],
+          url: ()=> (server[1] && server[1].host)? server[1].host : "",
+          protocol: ()=> (server[1] && server[1].protocol)? server[1].protocol : "",
+          protocolVersion: ()=> "",
+          hasDescription: ()=> (server[1] && server[1].description)? true : false,
+          description: ()=> (server[1])? server[1].description : "",
+          variables: ()=> (server[1] && server[1].variables)? {all: ()=> Object.entries(server[1].variables || {}).map((entry: any)=>{
+            return {
+              id: ()=> (entry[0])? entry[0] : "",
+              description: ()=> (entry[1] && entry[1].description)? entry[1].description : "",
+              hasDefaultValue: ()=> (entry[1] && entry[1].default)? true : false,
+              defaultValue: ()=> (entry[1] && entry[1].default)? entry[1].default : "",
+              hasAllowedValues: ()=> (entry[1] && entry[1].enum)? true : false,
+              allowedValues: ()=> (entry[1] && entry[1].enum)? entry[1].enum : []
+
+            };
+          }) }: "",
+          security: ()=> {
+            return server[1].security?.map( (sec: any)=>{
+              return {
+                all: ()=> Object.entries(sec || {}).map((security: any)=>{
+                return {
+                  scheme: ()=>{
+                    return {
+                      type: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()])? asyncapi.components.securitySchemes[security[1].split('/').pop()].type : "",
+                      hasDescription: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()] && asyncapi.components.securitySchemes[security[1].split('/').pop()].description )? true : false,
+                      description: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].description,
+                      name: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].name,
+                      in: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].in,
+                      bearerFormat: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].bearerFormat,
+                      openIdConnectUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].openIdConnectUrl,
+                      scheme: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].scheme,
+                      flows: ()=>  {
+                        if(!asyncapi.components.securitySchemes[security[1].split('/').pop()].flows) {return;}
+                        return {
+                          authorizationCode: ()=> { return {
+                            authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode.authorizationUrl,
+                            refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.refreshUrl,
+                            tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.tokenUrl,
+                            scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.availableScopes || []
+                          };},
+                          clientCredentials: ()=> { return {
+                            authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.authorizationUrl,
+                            refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.refreshUrl,
+                            tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.tokenUrl,
+                            scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.availableScopes || []
+                          };},
+                          implicit: ()=> { return {
+                            authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.authorizationUrl,
+                            refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.refreshUrl,
+                            tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.tokenUrl,
+                            scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.availableScopes || []
+                          };},
+                          password: ()=> { return {
+                            authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.authorizationUrl,
+                            refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.refreshUrl,
+                            tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.tokenUrl,
+                            scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.availableScopes || []
+                          };}
+                        };
+                      }
+                    };
+                  }, 
+                  scopes: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()])? asyncapi.components.securitySchemes[security[1].split('/').pop()].scopes || [] : ""
+                };
+              })
+            };
+            });
+          },
+          extensions: ()=> {
+            return {
+              all: ()=> Object.entries(server[1].extensions || {}).map((extension: any)=>{
+                return {
+                  id: ()=> extension[1].id,
+                  value: ()=> extension[1].value
+                };
+              })
+            };
+          },
+          bindings: ()=>{
+            return {
+              isEmpty: ()=> (server[1].bindings)? false : true,
+              all: ()=> {
+                return Object.entries(server[1].bindings || {}).map((binding : any)=>{
+                  return {
+                    protocol: ()=> (binding[1] && binding[1].protocol)? binding[1].protocol : "",
+                    json: ()=> (binding[1] && binding[1].json)? binding[1].json : "",
+                    type: ()=> (binding[1] && binding[1].type)? binding[1].type : ""
+                  };
+                });
+              }
+            };
+          },
+          tags: ()=> {
+            return {
+              isEmpty: ()=> (server[1].tags)? false : true,
+              all: ()=> Object.entries(server[1].tags || {}).map((tag: any)=>{
+                return {
+                  name: ()=> (tag[1] && tag[1].name)? tag[1].name : "",
+                  description: ()=> (tag[1] && tag[1].description)? tag[1].description : "",
+                  externalDocs: ()=> (tag[1] && tag[1].externalDocs)? {
+                    url: ()=> tag[1].externalDocs.url,
+                    description: ()=> tag[1].externalDocs.description
+                  } : ""
+
+                };
+              })
+            };
+          }
+        };
+      });
+    }
+  };
+}
+
+export default async function asyncapiMarkdown(asyncapi: any, context: vscode.ExtensionContext) {
     
+  const templatePath = path.join(context.extensionPath,'dist', 'components','Asyncapi.ejs');
+  if(!asyncapi.isAsyncapiParser){
+    return await ejs.renderFile(templatePath, {
+      info: {
+          title: (asyncapi.info && asyncapi.info.title)? asyncapi.info.title : "",
+          version: (asyncapi.info && asyncapi.info.version)? asyncapi.info.version : "",
+          defaultContentType: (asyncapi.defaultContentType)? asyncapi.defaultContentType : "",
+          specId: asyncapi.info && (asyncapi.info.specId)? asyncapi.info.specId : "",
+          termsOfService: (asyncapi.info && asyncapi.info.termsOfService)? asyncapi.info.termsOfService : "",
+          license: (asyncapi.info && asyncapi.info.license)? {url: ()=> asyncapi.info.license.url, name: ()=> asyncapi.info.license.name} : null,
+          contact: (asyncapi.info && asyncapi.info.contact)? {name: ()=> asyncapi.info.contact.name, url: ()=> asyncapi.info.contact.url, email: asyncapi.info.contact.email} : null,
+          externalDocs: (asyncapi.info && asyncapi.info.externalDocs)? {url: ()=> asyncapi.info.externalDocs.url(), description: ()=> asyncapi.info.externalDocs.description()} : null,
+          hasDescription: (asyncapi.info && asyncapi.info.description)? true: false,
+          description:(asyncapi.info)? md.render(asyncapi.info.description || "") : "",
+          tags: {
+              isEmpty: ()=> (asyncapi.info.tags)? false : true,
+              all: ()=> Object.entries(asyncapi.info.tags || {}).map((tag: any)=>{
+                return {
+                  name: ()=> (tag[1] && tag[1].name)? tag[1].name : "",
+                  description: ()=> (tag[1] && tag[1].description)? tag[1].description : "",
+                  externalDocs: ()=> (tag[1] && tag[1].externalDocs)? {
+                    url: ()=> tag[1].externalDocs.url,
+                    description: ()=> tag[1].externalDocs?.description,
+                    hasDescription: ()=> tag[1].externalDocs?.description? true : false
+                  } : ""
+                };
+              })
+            }
+      },
+      servers:{
+          servers: addServers(asyncapi),
+          schemaHelper: SchemaHelper,
+          serverHelper: ServerHelper,
+          md
+      },
+      operations:{
+        channels: {
+          isEmpty: ()=> (asyncapi.channels)? false : true,
+          all: ()=>  Object.entries(asyncapi.channels || {}).map((channel: any)=>{
+            return {
+              servers: ()=> addServers(asyncapi),
+              operations: ()=> {
+                return {
+                  all: ()=> Object.entries(asyncapi.operations || {}).filter((operation: any)=> operation[1].channel?.$ref.split('channels/').pop().replaceAll('~1','/') === channel[0]).map((operation: any)=>{
+                    return {
+                      operationId: ()=> (operation[0])? operation[0] : "",
+                      isSend: ()=> (operation[1] && operation[1].action === 'send')? true : false,
+                      isReceive: ()=> (operation[1] && operation[1].action === 'receive')? true : false,
+                      reply: ()=> (operation[1] && operation[1].reply)? operation[1].reply : false,
+                      summary: ()=> (operation[1] && operation[1].summary)? operation[1].summary : "",
+                      hasDescription: ()=> (operation[1] && operation[1].description)? true : false,
+                      description: ()=> (operation[1] && operation[1].description)? operation[1].description : "",
+                      externalDocs: ()=> (operation[1] && operation[1].externalDocs)? {
+                        url: ()=> operation[1].externalDocs.url,
+                        description: ()=> operation[1].externalDocs.description,
+                        hasDescription: ()=> operation[1].externalDocs.description? true : false
+                      } : "",
+                      tags: ()=> {
+                        return {
+                          isEmpty: ()=> (operation[1].tags)? false : true,
+                          all: ()=> Object.entries(operation[1].tags || {}).map((tag: any)=>{
+                            return {
+                              name: ()=> (tag[1] && tag[1].name)? tag[1].name : "",
+                              description: ()=> (tag[1] && tag[1].description)? tag[1].description : "",
+                              externalDocs: ()=> (tag[1] && tag[1].externalDocs)? {
+                                url: ()=> tag[1].externalDocs?.url,
+                                description: ()=> tag[1].externalDocs?.description,
+                                hasDescription: ()=> tag[1].externalDocs?.description? true : false
+                              } : ""
+
+                            };
+                          })
+                        };
+                      },
+                      extensions: ()=> {
+                        return {
+                          all: ()=> Object(operation[1].extensions).map((extension: any)=>{
+                            return {
+                              id: ()=> extension[1].id,
+                              value: ()=> extension[1].value
+                            };
+                          })
+                        };
+                      },
+                      bindings: ()=>{
+                        return {
+                          isEmpty: ()=> (operation[1].bindings)? false : true,
+                          all: ()=> {
+                            return Object.entries(operation[1].bindings || {}).map((binding : any)=>{
+                              return {
+                                protocol: ()=> (binding[1] && binding[1].protocol)? binding[1].protocol : "",
+                                json: ()=> (binding[1] && binding[1].json)? binding[1].json : "",
+                                type: ()=> (binding[1] && binding[1].type)? binding[1].type : ""
+                              };
+                            });
+                          }
+                        };
+                      },
+                      security: ()=> {
+                        return operation[1].security?.map( (sec: any)=>{
+                          return {
+                            all: ()=> Object.entries(sec || {}).map((security: any)=>{
+                            return {
+                              scheme: ()=>{
+                                return {
+                                  type: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()])? asyncapi.components.securitySchemes[security[1].split('/').pop()].type : "",
+                                  hasDescription: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()] && asyncapi.components.securitySchemes[security[1].split('/').pop()].description )? true : false,
+                                  description: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].description,
+                                  name: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].name,
+                                  in: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].in,
+                                  bearerFormat: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].bearerFormat,
+                                  openIdConnectUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].openIdConnectUrl,
+                                  scheme: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].scheme,
+                                  flows: ()=>  {
+                                    if(!asyncapi.components.securitySchemes[security[1].split('/').pop()].flows) {return;}
+                                    return {
+                                      authorizationCode: ()=> { return {
+                                        authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode.authorizationUrl,
+                                        refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.refreshUrl,
+                                        tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.tokenUrl,
+                                        scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()].flows?.authorizationCode?.availableScopes || []
+                                      };},
+                                      clientCredentials: ()=> { return {
+                                        authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.authorizationUrl,
+                                        refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.refreshUrl,
+                                        tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.tokenUrl,
+                                        scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.clientCredentials?.availableScopes || []
+                                      };},
+                                      implicit: ()=> { return {
+                                        authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.authorizationUrl,
+                                        refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.refreshUrl,
+                                        tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.tokenUrl,
+                                        scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.implicit?.availableScopes || []
+                                      };},
+                                      password: ()=> { return {
+                                        authorizationUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.authorizationUrl,
+                                        refreshUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.refreshUrl,
+                                        tokenUrl: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.tokenUrl,
+                                        scopes: ()=> asyncapi.components.securitySchemes[security[1].split('/').pop()]?.flows?.password?.availableScopes || []
+                                      };}
+                                    };
+                                  }
+                                };
+                              }, 
+                              scopes: ()=> (asyncapi.components && asyncapi.components.securitySchemes && asyncapi.components.securitySchemes[security[1].split('/').pop()])? asyncapi.components.securitySchemes[security[1].split('/').pop()].scopes || [] : ""
+                            };
+                          })
+                        };
+                        });
+                      },
+                      messages: ()=>{
+                        return {
+                          all: ()=>{
+                            let tmp: any = Object.values(operation[1].messages);
+                            if(tmp[0]?.$ref) {
+                              return [{incorrect: true, refs: Object.values(operation[1].messages)}];
+                            }
+                            return Object.entries(operation[1].messages|| {}).map((message: any)=>{
+                              return {
+                                id: ()=> message[0],
+                                title: ()=> message[1].title,
+                                name: ()=> message[1].name,
+                                hasDescription: ()=> (message[1].description)? true : false,
+                                description: ()=> message[1].description,
+                                contentType: ()=> message[1].contentType,
+                                summary: ()=> message[1].summary,
+                                correlationId: ()=> {
+                                  return {
+                                    location: ()=> message[1].correlationId?.location,
+                                    hasDescription: ()=> message[1].correlationId? true : false,
+                                    description: ()=> message[1].correlationId?.description
+                                  };
+                                },
+                                externalDocs: ()=> {
+                                  return {
+                                    url: ()=> message[1].externalDocs?.url,
+                                    description: ()=> message[1].externalDocs?.description
+                                  };
+                                },
+                                headers: ()=> {
+                                  return {
+                                    incorrect: true,
+                                    ...message[1].headers 
+                                  };
+                                },
+                                payload: ()=> {
+                                  return {
+                                    incorrect: true,
+                                    ...message[1].payload 
+                                  }; 
+                                },
+                                tags: ()=> {
+                                  return {
+                                    isEmpty: ()=> (operation[1].tags)? false : true,
+                                    all: ()=> Object.entries(operation[1].tags || {}).map((tag: any)=>{
+                                      return {
+                                        name: ()=> (tag[1] && tag[1].name)? tag[1].name : "",
+                                        description: ()=> (tag[1] && tag[1].description)? tag[1].description : "",
+                                        externalDocs: ()=> (tag[1] && tag[1].externalDocs)? {
+                                          url: ()=> tag[1].externalDocs.url,
+                                          description: ()=> tag[1].externalDocs?.description,
+                                          hasDescription: ()=> tag[1].externalDocs?.description? true : false
+                                        } : ""
+                              
+                                      };
+                                    })
+                                  };
+                                },
+                                extensions: ()=> {
+                                  return {
+                                    all: ()=> Object.entries(message[1].extensions || {}).map((extension: any)=>{
+                                      return {
+                                        id: ()=> extension[1].id,
+                                        value: ()=> extension[1].value
+                                      };
+                                    })
+                                  };
+                                },
+                                bindings: ()=>{
+                                  return {
+                                    isEmpty: ()=> (message[1].bindings)? false : true,
+                                    all: ()=> {
+                                      return Object.entries(message[1].bindings || {}).map((binding : any)=>{
+                                        return {
+                                          protocol: ()=> (binding[1] && binding[1].protocol)? binding[1].protocol : "",
+                                          json: ()=> (binding[1] && binding[1].json)? binding[1].json : "",
+                                          type: ()=> (binding[1] && binding[1].type)? binding[1].type : ""
+                                        };
+                                      });
+                                    }
+                                  };
+                                }
+                              };
+                            });
+                          }
+                        };
+                      }
+                    };
+                  }),
+
+              };
+              },
+              address: ()=> (channel[1])? channel[1].address : "",
+              hasDescription: ()=> (channel[1] && channel[1].description)? true : false,
+              description: ()=> (channel[1] && channel[1].description)? channel[1].description : "",
+              parameters: ()=> {
+                return {
+                  all: ()=> Object.entries(channel[1].parameters || {}).map((parameter: any)=> {
+                    return {
+                      id: ()=> parameter[0],
+                      schema: ()=> {
+                        return {
+                          json: ()=>{
+                            return{
+                              type: parameter[1].schema?.type,
+                              title: parameter[1].schema?.title,
+                              required: parameter[1].schema?.required
+                            };
+                          }
+                        };
+                      },
+                      description: ()=>parameter[1].description,
+                      location: ()=>parameter[1].location
+                    };
+                  })
+                };
+              },
+              extensions: ()=> {
+                return {
+                  all: ()=> Object.entries(channel[1].extensions || {}).map((extension: any)=>{
+                    return {
+                      id: ()=> extension[1].id,
+                      value: ()=> extension[1].value
+                    };
+                  })
+                };
+              },
+              bindings: ()=>{
+                return {
+                  isEmpty: ()=> (channel[1].bindings)? false : true,
+                  all: ()=> {
+                    return Object.entries(channel[1].bindings || {}).map((binding : any)=>{
+                      return {
+                        protocol: ()=> (binding[1] && binding[1].protocol)? binding[1].protocol : "",
+                        json: ()=> (binding[1] && binding[1].json)? binding[1].json : "",
+                        type: ()=> (binding[1] && binding[1].type)? binding[1].type : ""
+                      };
+                    });
+                  }
+                };
+              }
+
+            };
+          })
+        },
+        isV3: (asyncapi.asyncapi)? asyncapi.asyncapi.split('.')[0] === '3' : true,
+        schemaHelper: SchemaHelper,
+        serverHelper: ServerHelper,
+        messageHelper: MessageHelper,
+        allServersLength: (asyncapi.servers)? Object.keys(asyncapi.servers).length : 0,
+        md
+      },
+      path:{
+          infoPath: path.join(context.extensionPath,'dist', 'components','Info.ejs'),
+          tagsPath: path.join(context.extensionPath,'dist', 'components','Tags.ejs'),
+          serversPath: path.join(context.extensionPath,'dist', 'components','Servers.ejs'),
+          securityPath: path.join(context.extensionPath,'dist', 'components','Security.ejs'),
+          bindingsPath: path.join(context.extensionPath,'dist', 'components','Bindings.ejs'),
+          extensionsPath: path.join(context.extensionPath,'dist', 'components','Extensions.ejs'),
+          schemaPath: path.join(context.extensionPath,'dist', 'components','Schema.ejs'),
+          operationsPath: path.join(context.extensionPath,'dist', 'components','Operations.ejs'),
+          messagePath: path.join(context.extensionPath,'dist', 'components','Message.ejs')
+      }
+  });
+  }else{
     
     const info = asyncapi.info();
-    const templatePath = path.join(context.extensionPath,'dist', 'components','Asyncapi.ejs');
-
     return await ejs.renderFile(templatePath, {
         info: {
             title: info.title(),
@@ -657,4 +1092,7 @@ export default async function asyncapiMarkdown(asyncapi:AsyncAPIDocumentInterfac
             messagePath: path.join(context.extensionPath,'dist', 'components','Message.ejs')
         }
     });
+  }
+    
+
 }  

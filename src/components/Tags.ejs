@@ -12,9 +12,9 @@
     <tbody>
       <% for(let entry of tags.all()){ %>
         <tr>
-          <td data-th="Name"><%= entry.name() %></td>
-          <td data-th="Description"><%= entry.description() %></td>
-          <% if(entry.externalDocs()){ %>
+          <td data-th="Name"><%= entry.name() || '-' %></td>
+          <td data-th="Description"><%= entry.description() || '-' %></td>
+          <% if(entry.externalDocs() && entry.externalDocs().url()){ %>
             <td data-th="Documentation"><a href="<%= entry.externalDocs().url() %>" ><%= entry.externalDocs() && entry.externalDocs().hasDescription() ? entry.externalDocs().description() : 'Find more info here' %></a></td>
           <% }else { %>
             <td data-th="Documentation">-</td>

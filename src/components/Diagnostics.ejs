@@ -9,7 +9,8 @@
             <div class="left-bar low"></div>
         <% }else if(diagnostic.severity == 3) { %> 
             <div class="left-bar hint"></div>
-        <% } %>       
+        <% } %>  
+        <button class="close-btn" onclick="this.parentElement.style.display='none'">✖</button>     
         <div class="content-box">
             <h2 class="message"><span class="icon">⚠️</span><%= diagnostic.message %></h2>
             <p class="secondary-text"><%= diagnostic.path %></p>

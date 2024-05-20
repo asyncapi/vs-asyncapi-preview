@@ -1,4 +1,4 @@
-<% if (message) { 
+<% if (message && !message.incorrect) { 
     const messageId = message.id();
     const headers = message.headers();
     const payload = message.payload();
@@ -35,11 +35,11 @@
           <% if(correlationId) { %>
             <ul>
               <li>
-                Correlation ID: <%= correlationId.location() %>
+                Correlation ID: <%= correlationId?.location() %>
               </li>
-              <% if(correlationId.hasDescription()) { %>
+              <% if(correlationId?.hasDescription()) { %>
                   <br />
-                  <%- md.render(correlationId.description()) %>
+                  <%- md.render(correlationId?.description()) %>
               <% } %>
             </ul>
           <% } %>
@@ -49,15 +49,15 @@
         <%- md.render(message.description()) %>
     <% } %>
   
-    <% if(externalDocs) { %> 
-        <a href='<%= externalDocs.url() %>'>
-            <%- md.render(externalDocs.description() || 'Find more info here.') %>
+    <% if(externalDocs && externalDocs?.url()) { %> 
+        <a href='<%= externalDocs?.url() %>'>
+            <%- md.render(externalDocs?.description() || 'Find more info here.') %>
         </a>
     <% } %>
   
-    <% if(headers) { %>
+    <% if(headers && !headers.incorrect) { %>
         <h5>Headers</h5>
-        <%- include(schemaPath,{schema:headers,schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
+        <%- include(schemaPath,{schema:headers.schema? headers.schema : headers,schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
         <% const ex = messageHelper.getHeadersExamples(message);
         if (ex) { %>
             <blockquote>Examples of headers</blockquote>
@@ -76,11 +76,34 @@
             <% } %>
         <% } %> 
 
-    <% } %>
+    <% }else if(headers && headers.incorrect) { %>
+            <% function renderHeaderObject(obj, indent) { %>
+            <% for (let key in obj) { %>
+                <% if (key != 'incorrect') { %>
+                <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
+                    <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
+                        <span class="key"><%= key %>:</span>
+                        <div>
+                            <%= renderHeaderObject(obj[key], indent + 20) %>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
+                        <span class="key"><%= key %>:</span>
+                        <span class="value"><%= obj[key] %></span>
+                    </div>
+                <% } %>
+                <% } %>
+            <% } %>
+            <% } %>
+            <div>
+                <%= renderHeaderObject(headers, 0) %>
+            </div>
+    <% } %>    
   
-        <% if(payload) { %>
+        <% if(payload && !payload.incorrect) { %>
             <h5>Payload</h5>
-            <%- include(schemaPath,{schema:payload, schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
+            <%- include(schemaPath,{schema:payload.schema? payload.schema : payload, schemaName:"", hideTitle:true, schemaHelper, md, path:""}) %>
             <% const examples = messageHelper.getPayloadExamples(message);
             if (examples) { %>
                     <blockquote>Examples of payload</blockquote>
@@ -100,10 +123,40 @@
     
             <% } %>
 
-        <% } %>
+            <% }else if(payload && payload.incorrect) { %>
+                        <% function renderPayloadObject(obj, indent) { %>
+                        <% for (let key in obj) { %>
+                            <% if(key != 'incorrect') { %>
+                            <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
+                                <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
+                                    <span class="key"><%= key %>:</span>
+                                    <div>
+                                    <%= renderPayloadObject(obj[key], indent + 20) %>
+                                    </div>
+                                </div>
+                            <% } else { %>
+                                <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
+                                    <span class="key"><%= key %>:</span>
+                                    <span class="value"><%= obj[key] %></span>
+                                </div>
+                            <% } %>
+                            <% } %>
+                        <% } %>
+                        <% } %>
+                        <div>
+                            <%= renderPayloadObject(payload, 0) %>
+                        </div>
+                <% } %>  
   
         <%- include(bindingsPath,{name:"Message specific information", bindings:message.bindings(), schemaHelper, schemaPath}) %>
         <%- include(extensionsPath,{name:"Message extensions", extensions:message.extensions(), schemaHelper, schemaPath}) %>
         <%- include(tagsPath,{name:"Message tags", tags:message.tags()}) %>
+<% }else if(message && message.incorrect) { %>
+    <h4>Message</h4>
+    <ul>
+        <% for (let ref of message.refs) { %>
+            <li><%= `${Object.values(ref || {})[0].split('/')[2]?.replaceAll('~1',' / ')} / ${Object.values(ref || {})[0].split('/').pop()}` %></li>
+        <% } %>
+    </ul>
 <% } %>
 

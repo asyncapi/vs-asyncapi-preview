@@ -108,6 +108,7 @@
   
 
     function flowsRenderer([flowName, flow]) { 
+      console.log(flow);
       return [serverHelper.flowName(flowName) || '-', (flow?.authorizationUrl() ? flow.authorizationUrl() : '-'), (flow?.tokenUrl() ? flow.tokenUrl() : '-'), (flow?.refreshUrl() ? flow.refreshUrl() : '-'), Object.keys(flow?.scopes() || {}).length ? Object.keys(flow.scopes()).map(v => `\`${v}\``).join(', ') : '-' ]; 
     } 
    function renderSecuritySchemasFlows({ securitySchema, requiredScopes, schemas }) { 
