@@ -67,6 +67,10 @@ const extensionConfig = {
         {
           from: 'src/components',
           to: 'components'
+        },
+        {
+          from: 'src/globals.css',
+          to: 'globals.css'
         } 
 
       ],
