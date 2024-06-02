@@ -4,13 +4,10 @@ import * as fs from 'fs';
 import { isAsyncAPIFile } from './PreviewWebPanel';
 import Diagnostics from './Diagnostics';
 import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
+import { AvroSchemaParser } from '@asyncapi/avro-schema-parser';
 import Asyncapi from './Asyncapi';
 import { ISpectralDiagnostic } from '@stoplight/spectral-core';
 import { parse } from 'yaml';
-
-function delay(ms: number | undefined) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
  function parsedAsyncapiPreview(){
   const editor: any = vscode.window.activeTextEditor;
@@ -35,7 +32,7 @@ function delay(ms: number | undefined) {
 
 
 const parser = new Parser();
-
+parser.registerSchemaParser(AvroSchemaParser());
 
 async function buildMarkdown(document: any, diagnostics: ISpectralDiagnostic[], context: vscode.ExtensionContext){
 
@@ -83,8 +80,7 @@ export const openAsyncapiMdFiles: { [id: string]: vscode.WebviewPanel } = {}; //
 export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri: vscode.Uri) {
   const localResourceRoots = [
     vscode.Uri.file(path.dirname(uri.fsPath)),
-    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/mermaid/dist/mermaid.min.js'),
-    vscode.Uri.joinPath(context.extensionUri, 'dist/globals.css')
+    vscode.Uri.joinPath(context.extensionUri, 'dist')
   ];
   if (vscode.workspace.workspaceFolders) {
     vscode.workspace.workspaceFolders.forEach(folder => {
@@ -99,7 +95,8 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
       localResourceRoots,
     });
 
-  const { document, diagnostics } = await fromFile(parser, uri.fsPath).parse();   
+  const { document, diagnostics } = await fromFile(parser, uri.fsPath).parse();
+
   let result =  await buildMarkdown(document, diagnostics, context); 
 
 

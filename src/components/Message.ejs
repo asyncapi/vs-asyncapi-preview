@@ -23,7 +23,7 @@
       <% } %>
 
       <% if(showInfoList) { %>
-        <div>
+        <ul>
             <% if(messageId) { %>
                 <li>Message ID: <%= messageId %></li>
             <% } %>
@@ -33,7 +33,6 @@
             </li>
           <% } %>
           <% if(correlationId) { %>
-            <ul>
               <li>
                 Correlation ID: <%= correlationId?.location() %>
               </li>
@@ -41,9 +40,8 @@
                   <br />
                   <%- md.render(correlationId?.description()) %>
               <% } %>
-            </ul>
           <% } %>
-        </div>
+        </ul>
     <% } %>
     <% if(message.hasDescription()) { %>
         <%- md.render(message.description()) %>

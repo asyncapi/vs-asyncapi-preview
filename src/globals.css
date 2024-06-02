@@ -16,7 +16,7 @@ h1 {
 }
 .container {
   display: flex;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .section {
   flex: 0 0 100%;
