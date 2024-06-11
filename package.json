@@ -55,8 +55,8 @@
         "command": "asyncapi.markdown",
         "title": "Preview Asyncapi Markdown",
         "icon": {
-          "light": "resources/icons/open-preview_black.svg",
-          "dark": "resources/icons/open-preview_white.svg"
+          "light": "resources/icons/open-markdown-preview_black.svg",
+          "dark": "resources/icons/open-markdown-preview_white.svg"
         }
       }
     ],
@@ -151,6 +151,7 @@
     "ejs": "^3.1.9",
     "markdown-it": "^14.0.0",
     "mermaid": "^10.8.0",
+    "panzoom": "^9.4.3",
     "yaml": "^2.4.2"
   }
 }

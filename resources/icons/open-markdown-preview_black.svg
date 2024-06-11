@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="2674" height="1760" viewBox="0 0 2674 1760" xml:space="preserve">
+<desc>Created with Fabric.js 3.6.6</desc>
+<defs>
+</defs>
+<g transform="matrix(0 0.09 -0.2 0 4.93 -35.66)"  >
+<path style="stroke: rgb(0,0,0); stroke-opacity: 0; stroke-width: 8; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;"  transform=" translate(-57.95, -51.83)" d="m 0 0 l 57.952755 0 l 0 0 c 32.006428 -1.4055393e-14 57.952755 23.203636 57.952755 51.82677 c 0 28.623135 -25.946327 51.82677 -57.952755 51.82677 l -57.952755 0 z" stroke-linecap="round" />
+</g>
+<g transform="matrix(0 0.29 -0.2 0 9.1 -22.83)"  >
+<path style="stroke: rgb(189,189,189); stroke-width: 8; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(220,220,218); fill-rule: evenodd; opacity: 1;"  transform=" translate(-59.83, -29.92)" d="m 0 14.960629 l 89.732285 0 l 0 -14.960629 l 29.921257 29.921259 l -29.921257 29.921259 l 0 -14.9606285 l -89.732285 0 z" stroke-linecap="round" />
+</g>
+<g transform="matrix(-0.09 8.81 -9.06 -0.1 2008.07 912.88)"  >
+<path style="stroke: rgb(0,0,0); stroke-width: 8; stroke-dasharray: ; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: round; stroke-miterlimit: 10; fill: rgb(46,46,46); fill-rule: evenodd; opacity: 1;"  transform=" translate(-59.83, -29.92)" d="m 0 14.960629 l 89.732285 0 l 0 -14.960629 l 29.921257 29.921259 l -29.921257 29.921259 l 0 -14.9606285 l -89.732285 0 z" stroke-linecap="round" />
+</g>
+<g transform="matrix(60.12 0 0 56.56 848.68 889.99)" style=""  >
+		<text xml:space="preserve" font-family="'Oswald', sans-serif" font-size="36" font-style="normal" font-weight="bold" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(61,61,61); fill-rule: nonzero; opacity: 1; white-space: pre;" ><tspan x="-11.21" y="11.31" style="stroke-width: 1; font-family: 'Lucida Console', Monaco, monospace; font-style: normal; ">M</tspan></text>
+</g>
+</svg>
