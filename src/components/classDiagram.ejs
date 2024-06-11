@@ -1,0 +1,59 @@
+<pre class="mermaid">
+    %%{
+        init: {
+          'theme': 'base',
+          "themeVariables": {
+          "primaryColor": "#fff",
+          "primaryBorderColor": "#646466",
+          "tertiaryColor": "#fff"
+        }
+        }
+    }%%
+    
+    classDiagram
+    <% for( let channel of channels){ %>
+        class <%= channel[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= channel[0] %>"]{
+            <% for( let prop of Object.entries(channel[1])){ %>
+                + <%= typeof prop[1] %> <%= prop[0] %>
+            <% } %>
+        }
+    <% } %>
+    <% for( let operation of operations){ %>
+        class <%= operation[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= operation[0] %>"]{
+            <% for( let prop of Object.entries(operation[1])){ %>
+                + <%= typeof prop[1] %> <%= prop[0] %>
+            <% } %>
+        }
+    <% } %>
+    <% for( let message of messages){ %>
+        class <%= message[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= message[0] %>"]{
+            <% for( let prop of Object.entries(message[1])){ %>
+                + <%= typeof prop[1] %> <%= prop[0] %>
+            <% } %>
+        }
+    <% } %>
+    <% for( let payload of payloads){ %>
+        class <%= payload[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= payload[0] %>"]{
+            <% Object.getOwnPropertyNames(payload[1]).map(prop=>{ %>
+                + <%= typeof payload[1][prop] %> <%= prop %>
+            <% }) %>
+        }
+    <% } %>
+    <% for( let header of headers){ %>
+        class <%= header[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= header[0] %>"]{
+            <% Object.getOwnPropertyNames(header[1]).map(prop=>{ %>
+                + <%= typeof header[1][prop] %> <%= prop %>
+            <% }) %>
+        }
+    <% } %>
+    <% for( let other of others){ %>
+        class <%= other[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= other[0] %>"]{
+            <% Object.getOwnPropertyNames(other[1]).map(prop=>{ %>
+                + <%= typeof other[1][prop] %> <%= prop %>
+            <% }) %>
+        }
+    <% } %>
+    <% for( let relation of relations) {  %>
+        <%= relation %>
+        <% } %>
+</pre>

@@ -1,26 +1,84 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { isAsyncAPIFile } from './PreviewWebPanel';
-
+import Diagnostics from './Diagnostics';
 import { Parser, fromFile, AsyncAPIDocumentInterface } from '@asyncapi/parser';
+import { AvroSchemaParser } from '@asyncapi/avro-schema-parser';
 import Asyncapi from './Asyncapi';
-
+import { ISpectralDiagnostic } from '@stoplight/spectral-core';
+import { parse } from 'yaml';
+import Flowchart from './Flowchart';
+import ClassDiagram from './ClassDiagram';
 
 const parser = new Parser();
+parser.registerSchemaParser(AvroSchemaParser());
+
+ function parsedAsyncapiPreview(){
+
+    const editor: any = vscode.window.activeTextEditor;
+    if(!editor) {return;}
+    const document = editor.document;
+    const filePath: any = document?.fileName;
+    const fullPath = path.resolve(filePath);
+    const content = fs.readFileSync(fullPath, 'utf8');
 
 
-async function buildMarkdown(document:AsyncAPIDocumentInterface | undefined, context: vscode.ExtensionContext){
+    let parsedData;
+    if (filePath.endsWith('.json')) {
+      parsedData = JSON.parse(content);
+    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+      parsedData = parse(content);
+    } else {
+      vscode.window.showInformationMessage('Unsupported file type.');
+      return;
+    }
+    return parsedData || "";
+}
+
+
+
+async function buildMarkdown(document: any, diagnostics: ISpectralDiagnostic[], context: vscode.ExtensionContext){
 
 
   let content = '';
 
   if(document !== undefined){
-    
+    vscode.window.onDidChangeActiveTextEditor(()=>null);
+    document.isAsyncapiParser = true;
     content = await Asyncapi(document, context);
+  }else{
+    content = await Diagnostics(diagnostics, context);
+    vscode.window.onDidChangeActiveTextEditor(async()=>{
+      
+      let parsedData: any = parsedAsyncapiPreview();
+      if(parsedData){
+        parsedData.isAsyncapiParser = false;
+        content += await Asyncapi(parsedData, context);
+      }
+    });
+    let parsedData: any = parsedAsyncapiPreview();
+    if(parsedData){
+      parsedData.isAsyncapiParser = false;
+      content += await Asyncapi(parsedData, context);
+    }
   }
 
   return content;
 
+}
+
+async function buildDiagrams(context: vscode.ExtensionContext){
+  let parsedData: any = parsedAsyncapiPreview();
+  let flowchart;
+  let classDiagram;
+
+  if(parsedData){
+    flowchart = await Flowchart(parsedData, context);
+    classDiagram = await ClassDiagram(parsedData, context);
+  }
+
+  return {flowchart, classDiagram};
 }
 
 export function previewMarkdown(context: vscode.ExtensionContext) {
@@ -39,7 +97,7 @@ export const openAsyncapiMdFiles: { [id: string]: vscode.WebviewPanel } = {}; //
 export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri: vscode.Uri) {
   const localResourceRoots = [
     vscode.Uri.file(path.dirname(uri.fsPath)),
-    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/mermaid/dist/mermaid.min.js')
+    vscode.Uri.joinPath(context.extensionUri, 'dist')
   ];
   if (vscode.workspace.workspaceFolders) {
     vscode.workspace.workspaceFolders.forEach(folder => {
@@ -54,12 +112,13 @@ export async function openAsyncAPIMarkdown(context: vscode.ExtensionContext, uri
       localResourceRoots,
     });
 
-  const { document } = await fromFile(parser, uri.fsPath).parse();   
-  let result =  await buildMarkdown(document, context); 
+  const { document, diagnostics } = await fromFile(parser, uri.fsPath).parse();
 
+  let result =  await buildMarkdown(document, diagnostics, context); 
+  let {flowchart, classDiagram} = await buildDiagrams(context);  
 
   panel.title = path.basename(uri.fsPath);
-  panel.webview.html = getWebviewContent(context, panel.webview, uri, result);
+  panel.webview.html = getWebviewContent(context, panel.webview, uri, result, flowchart, classDiagram);
 
   panel.onDidDispose(() => {
     delete openAsyncapiMdFiles[uri.fsPath];
@@ -83,175 +142,43 @@ async function promptForAsyncapiFile() {
   return uris?.[0];
 }
 
-function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri, result:any) {
+function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri, result: any, flowchart: any, classDiagram: any) {
   const mermaidJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/mermaid/dist/mermaid.min.js')
+  );
+  const panzoomJs = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/panzoom/dist/panzoom.min.js')
+  );
+  const globalsCSS = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/globals.css')
   );
 
   const html = `
   <!DOCTYPE html>
   <html>
     <head>
-      <style> 
-        html{
-          scroll-behavior: smooth;
-        }
-        body {
-          color: #121212;
-          background-color: #efefef;
-          word-wrap: break-word;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-        }
-        h1 {
-          color: #121212;
-        }
-        .container {
-          display: flex;
-          overflow-x: hidden;
-        }
-        .section {
-          flex: 0 0 100%;
-          box-sizing: border-box;
-          padding: 20px;
-          aspect-ratio:1;
-          overflow-y: auto;
-          height:calc(100vh - 60px);;
-        }
-        .button-container {
-          display: flex;
-          justify-content: center;
-          margin: 10px;
-        }
-        .button {
-          padding: 10px 20px;
-          margin: 0px 10px;
-          border-radius: .5rem;
-          color: #444;
-          font-size: 1rem;
-          font-weight: 700;
-          letter-spacing: .1rem;
-          cursor: pointer;
-          flex:1;
-          border: none;
-          outline: none;
-          transition: .2s ease-in-out;
-          box-shadow: -6px -6px 14px rgba(255, 255, 255, .7),
-                      -6px -6px 10px rgba(255, 255, 255, .5),
-                      6px 6px 8px rgba(255, 255, 255, .075),
-                      6px 6px 10px rgba(0, 0, 0, .15);
-          }
-          button:hover {
-            box-shadow: -2px -2px 6px rgba(255, 255, 255, .6),
-                        -2px -2px 4px rgba(255, 255, 255, .4),
-                        2px 2px 2px rgba(255, 255, 255, .05),
-                        2px 2px 4px rgba(0, 0, 0, .1);
-          }
-          button:active {
-            box-shadow: inset -2px -2px 6px rgba(255, 255, 255, .7),
-                        inset -2px -2px 4px rgba(255, 255, 255, .5),
-                        inset 2px 2px 2px rgba(255, 255, 255, .075),
-                        inset 2px 2px 4px rgba(0, 0, 0, .15);
-          }
-        .table-container{
-          overflow-x:auto;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th, td {
-          padding: 12px;
-          text-align: left;
-          border-bottom: 1px solid #ddd;
-        }
-        th {
-          background-color: black;
-          color: white;
-        }
-        tr:nth-child(even) {
-          background-color: #fefefe;
-        }
-        code {
-          display: block;
-          padding: 10px;
-          background-color: #282c34;
-          color: #abb2bf;
-          border-radius: 5px;
-          margin-bottom: 20px;
-          margin-top: 20px;
-          white-space: pre-wrap;
-        }
-        blockquote {
-          border-left: 4px solid #61dafb;
-          margin: 0;
-          margin-top: 20px;
-          padding: 10px 20px;
-          background-color: #fff;
-          color: #333;
-        }
-        a {
-          text-decoration: none;
-          color: #3498db;
-          font-weight: bold;
-          transition: color 0.3s ease-in-out;
-        }
-        a:hover {
-          color: #1abc9c;
-        }
-    
-        @media screen and (max-width: 600px) {
-          table {
-            display: block;
-          }
-    
-          thead, tbody, th, td, tr {
-            display: block;
-          }
-    
-          th {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-          }
-    
-          td {
-            border: none;
-            position: relative;
-            padding-left: 50%;
-            white-space: nowrap;
-          }
-    
-          td:before {
-            position: absolute;
-            top: 12px;
-            left: 6px;
-            width: 45%;
-            padding-right: 10px;
-            white-space: nowrap;
-            content: attr(data-th) ": ";
-            font-weight: bold;
-          }
-          code {
-            font-size: 14px;
-          }
-    
-          blockquote {
-            font-size: 16px;
-          }
-        }
-      </style>
+      <link rel="stylesheet" href="${globalsCSS}"/>
     </head>
     <body x-timestamp="${Date.now()}">
 
       <div class="container">
         <div class="section" id="section1">${result}</div>
-        <div class="section" id="section2">Section 2</div>
-        <div class="section" id="section3">Section 3</div>
+        <div class="section" id="section2">${flowchart}</div>
+        <div class="section" id="section3">${classDiagram}</div>
+        <div id="control-panel">
+          <div id="zoom-in" class="control-button">+</div>
+          <div id="pan-up" class="control-button">↑</div>
+          <div id="zoom-out" class="control-button">-</div>
+          <div id="pan-left" class="control-button">←</div>
+          <div id="pan-right" class="control-button">→</div>
+          <div id="pan-down" class="control-button">↓</div>
+          </div>
+          <div id="zoom-info">
+              <div class="flowchart_div"> Zoom : <span id="flowchart_zoom-level"> 1</span> </div>
+              <div class="flowchart_div"> Scroll : <span id="flowchart_scroll-position"> 0, 0</span> </div>
+              <div class="classdiagram_div"> Zoom : <span id="classdiagram_zoom-level"> 1</span> </div>
+              <div class="classdiagram_div"> Scroll : <span id="classdiagram_scroll-position"> 0, 0</span> </div>
+          </div>
       </div>
 
       <div class="button-container">
@@ -261,13 +188,147 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       </div>
       
       
+
       <script src="${mermaidJs}"></script>
+      <script src="${panzoomJs}"></script>
       <script>
-        mermaid.initialize({ startOnLoad: true });  
+        let sectionElement;
+        let zoomLevelSpan = document.getElementById('flowchart_zoom-level');
+        let scrollPositionSpan = document.getElementById('flowchart_scroll-position');
+        const controlPanel = document.getElementById('control-panel');
+        const zoomInfo = document.getElementById('zoom-info');
+
+        mermaid.initialize({ 
+          "startOnLoad": true ,
+          "securityLevel": 'loose',
+          "theme": "base",
+            "themeVariables": {
+              "primaryColor": "#e8e9eb",
+              "primaryTextColor": "#000",
+              "primaryBorderColor": "#b9babd",
+              "lineColor": "#4169e1"
+            },
+          "flowchart": {
+            "defaultRenderer": "elk"
+          }
+        });  
         function moveToSection(sectionId) {
-          const sectionElement = document.getElementById(sectionId);
+          sectionElement = document.getElementById(sectionId);
           sectionElement.scrollIntoView({ behavior: 'smooth' });
+          if(sectionId === 'section1'){
+            controlPanel.style.display = "none";
+            zoomInfo.style.display = "none";
+          }else{
+            controlPanel.style.display = "flex";
+            zoomInfo.style.display = "flex";
+            if(sectionId === 'section2'){
+              document.querySelectorAll('.flowchart_div').forEach(ele=> {ele.style.display = "flex";})
+              document.querySelectorAll('.classdiagram_div').forEach(ele=> {ele.style.display = "none";})
+              zoomLevelSpan = document.getElementById('flowchart_zoom-level');
+              scrollPositionSpan = document.getElementById('flowchart_scroll-position');
+            }else {
+              document.querySelectorAll('.flowchart_div').forEach(ele=> {ele.style.display = "none";})
+              document.querySelectorAll('.classdiagram_div').forEach(ele=> {ele.style.display = "flex";})
+              zoomLevelSpan = document.getElementById('classdiagram_zoom-level');
+              scrollPositionSpan = document.getElementById('classdiagram_scroll-position');
+            }
+          }
         }
+         document.addEventListener("DOMContentLoaded", function() { 
+            const flowchartElement = document.getElementById('section2');
+            const classDiagramElement = document.getElementById('section3');
+            const panZoomFlowchartInstance = panzoom(flowchartElement.querySelector('.mermaid'), {
+                maxScale: 4,
+                minScale: 0.5,
+                contain: 'outside'
+            });
+            const panZoomClassDiagramInstance = panzoom(classDiagramElement.querySelector('.mermaid'), {
+                maxScale: 4,
+                minScale: 0.5,
+                contain: 'outside'
+            });
+
+            panZoomFlowchartInstance.on('zoom', function (e) {
+                zoomLevelSpan.textContent = e.getTransform().scale.toFixed(2);
+            });
+
+            panZoomFlowchartInstance.on('pan', function (e) {
+                const { x, y } = e.getTransform();
+                scrollPositionSpan.textContent = x.toFixed(0) + ', ' + y.toFixed(0);
+            });
+
+            panZoomClassDiagramInstance.on('zoom', function (e) {
+                zoomLevelSpan.textContent = e.getTransform().scale.toFixed(2);
+            });
+
+            panZoomClassDiagramInstance.on('pan', function (e) {
+                const { x, y } = e.getTransform();
+                scrollPositionSpan.textContent = x.toFixed(0) + ', ' + y.toFixed(0);
+            });
+
+            document.getElementById('zoom-in').addEventListener('click', function () {
+            if(sectionElement.id === 'section2')
+                panZoomFlowchartInstance.smoothZoom(flowchartElement.clientWidth / 2, flowchartElement.clientHeight / 2, 1.1);
+            else
+                panZoomClassDiagramInstance.smoothZoom(classDiagramElement.clientWidth / 2, classDiagramElement.clientHeight / 2, 1.1);
+            });
+
+            document.getElementById('zoom-out').addEventListener('click', function () {
+            if(sectionElement.id === 'section2')
+                panZoomFlowchartInstance.smoothZoom(flowchartElement.clientWidth / 2, flowchartElement.clientHeight / 2, 0.9);
+            else
+                panZoomClassDiagramInstance.smoothZoom(classDiagramElement.clientWidth / 2, classDiagramElement.clientHeight / 2, 0.9);
+            });
+
+            document.getElementById('pan-up').addEventListener('click', function () {
+              if(sectionElement.id === 'section2'){
+                const { x, y } = panZoomFlowchartInstance.getTransform()
+                panZoomFlowchartInstance.smoothMoveTo(x, y-50);
+              } else {
+                const { x, y } = panZoomClassDiagramInstance.getTransform()
+                panZoomClassDiagramInstance.smoothMoveTo(x, y-50);
+              }
+            });
+
+            document.getElementById('pan-down').addEventListener('click', function () {
+              if(sectionElement.id === 'section2'){
+                const { x, y } = panZoomFlowchartInstance.getTransform()
+                panZoomFlowchartInstance.smoothMoveTo(x, y+50);
+              }
+              else {        
+                const { x, y } = panZoomClassDiagramInstance.getTransform()
+                panZoomClassDiagramInstance.smoothMoveTo(x, y+50);
+              }
+            });
+
+            document.getElementById('pan-left').addEventListener('click', function () {
+              if(sectionElement.id === 'section2'){
+                const { x, y } = panZoomFlowchartInstance.getTransform()
+                panZoomFlowchartInstance.smoothMoveTo(x-50, y);
+              }
+              else {
+                const { x, y } = panZoomClassDiagramInstance.getTransform()
+                panZoomClassDiagramInstance.smoothMoveTo(x-50, y);
+              }
+            });
+
+            document.getElementById('pan-right').addEventListener('click', function () {
+              if(sectionElement.id === 'section2'){
+                const { x, y } = panZoomFlowchartInstance.getTransform()
+                panZoomFlowchartInstance.smoothMoveTo(x+50, y);
+              }            
+              else {
+                const { x, y } = panZoomClassDiagramInstance.getTransform()
+                panZoomClassDiagramInstance.smoothMoveTo(x+50, y);
+              }
+            });
+
+            
+        });
+
+        window.addEventListener("resize",()=>{
+            sectionElement.scrollIntoView({ behavior: 'smooth' });
+        });
       </script>
   
     </body>

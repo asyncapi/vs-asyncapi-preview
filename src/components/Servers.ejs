@@ -27,7 +27,7 @@
                   <% for(let entry of server.variables().all()){ %>
                     <tr>
                       <td data-th="Name"><%= entry.id() %></td>
-                      <td data-="Description"><%= entry.description() %></td>
+                      <td data-th="Description"><%= entry.description() %></td>
                       <% if(entry.hasDefaultValue()){ %>
                         <td data-th="Default value"><%= entry.defaultValue() %></td>
                       <% }else { %>

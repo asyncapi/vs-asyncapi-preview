@@ -1,0 +1,26 @@
+<pre class="mermaid">
+    flowchart TD
+        subgraph "\nServers"
+        <% for( let server of servers){ %>
+            <%= server.replaceAll(/[\(\)\[\]\{\}]/g, "")%>(["<%= server %>"])
+        <% } %> 
+        end
+        subgraph "\nChannels"
+        <% for( let channel of channels){ %>
+            <%= channel.replaceAll(/[\(\)\[\]\{\}]/g, "")%>(["<%= channel %>"])
+        <% } %> 
+        end
+        subgraph "\nOperations"
+        <% for( let operation of operations){ %>
+            <%= operation.replaceAll(/[\(\)\[\]\{\}]/g, "")%>(["<%= operation %>"])
+        <% } %> 
+        end
+        subgraph "\nMessages"
+        <% for( let message of messages){ %>
+            <%= message.replaceAll(/[\(\)\[\]\{\}]/g, "")%>(["<%= message %>"])
+        <% } %> 
+        end
+        <% for( let relation of relations) {  %>
+        <%= relation.replaceAll(/[\(\)\[\]\{\}]/g, "") %>
+        <% } %>
+</pre>
