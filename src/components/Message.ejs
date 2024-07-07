@@ -1,22 +1,21 @@
-<% if (message && !message.incorrect) { 
+<% if (message) { 
     const messageId = message.id();
     const headers = message.headers();
     const payload = message.payload();
+    const traits = message.traits();
     const correlationId = message.correlationId();
     const contentType = message.contentType();
     const externalDocs = message.externalDocs();
     const showInfoList = contentType || externalDocs;
 
     let header = 'Message';
-    if (message.title()) {
-        header += ` ${message.title()}`;
-    }
     const id = message.name() || messageId;
-    if (id) {
-        header += ` <code>${id}</code>`;
-    } %>
+    if (message.title() || id) {
+        header += ` ${(message.title() || "")}`;
+        header += ` <code>${id}</code>`; %>
+        <h4><%- header %></h4>
+    <% } %>
 
-    <h4><%- header %></h4>
 
       <% if(message.summary()) { %>
           <%- md.render(`*${message.summary()}*`) %>
@@ -25,16 +24,16 @@
       <% if(showInfoList) { %>
         <ul>
             <% if(messageId) { %>
-                <li>Message ID: <%= messageId %></li>
+                <li><b>Message ID:</b> <%= messageId %></li>
             <% } %>
           <% if(contentType) { %>
             <li>
-              Content type: <%- `<a href='https://www.iana.org/assignments/media-types/${contentType}'>${contentType}</a>` %>
+              <b>Content type:</b> <%- `<a href='https://www.iana.org/assignments/media-types/${contentType}'>${contentType}</a>` %>
             </li>
           <% } %>
-          <% if(correlationId) { %>
+          <% if(correlationId?.location()) { %>
               <li>
-                Correlation ID: <%= correlationId?.location() %>
+                <b>Correlation ID:</b> <%= correlationId?.location() %>
               </li>
               <% if(correlationId?.hasDescription()) { %>
                   <br />
@@ -74,28 +73,10 @@
             <% } %>
         <% } %> 
 
-    <% }else if(headers && headers.incorrect) { %>
-            <% function renderHeaderObject(obj, indent) { %>
-            <% for (let key in obj) { %>
-                <% if (key != 'incorrect') { %>
-                <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
-                    <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
-                        <span class="key"><%= key %>:</span>
-                        <div>
-                            <%= renderHeaderObject(obj[key], indent + 20) %>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
-                        <span class="key"><%= key %>:</span>
-                        <span class="value"><%= obj[key] %></span>
-                    </div>
-                <% } %>
-                <% } %>
-            <% } %>
-            <% } %>
+    <% }else if(headers?.incorrect && Object.values(headers || []).length > 1) { %>
             <div>
-                <%= renderHeaderObject(headers, 0) %>
+                <h5>Headers</h5>
+                <ul><%= renderObject(headers, 0) %></ul>
             </div>
     <% } %>    
   
@@ -113,7 +94,7 @@
                         <% }); %>
                    <% } %>
             <% }else { 
-                const payload = message.payload();
+                const payload = message?.payload();
                 if (payload) { %>
                     <blockquote>Examples of payload _generated_</blockquote>
                     <code><%- md.render(messageHelper.generateExample(payload.json())) %></code>
@@ -121,40 +102,42 @@
     
             <% } %>
 
-            <% }else if(payload && payload.incorrect) { %>
-                        <% function renderPayloadObject(obj, indent) { %>
-                        <% for (let key in obj) { %>
-                            <% if(key != 'incorrect') { %>
-                            <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
-                                <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
-                                    <span class="key"><%= key %>:</span>
-                                    <div>
-                                    <%= renderPayloadObject(obj[key], indent + 20) %>
-                                    </div>
-                                </div>
-                            <% } else { %>
-                                <div class="nested-object" <%= 'style="margin-left: '+ indent + 'px;"' %> >
-                                    <span class="key"><%= key %>:</span>
-                                    <span class="value"><%= obj[key] %></span>
-                                </div>
-                            <% } %>
-                            <% } %>
-                        <% } %>
-                        <% } %>
+            <% }else if(payload?.incorrect && Object.values(payload || []).length > 1) { %>
                         <div>
-                            <%= renderPayloadObject(payload, 0) %>
+                            <h5>Payload</h5>
+                            <ul><%= renderObject(payload, 0) %></ul>
                         </div>
-                <% } %>  
+            <% } %> 
+            
+            <% if(traits?.incorrect && Object.values(traits || []).length > 1) { %>
+                <div>
+                    <h5>Message Traits</h5>
+                    <ul><%= renderObject(traits, 0) %></ul>
+                </div>
+            <% } %>
   
         <%- include(bindingsPath,{name:"Message specific information", bindings:message.bindings(), schemaHelper, schemaPath}) %>
         <%- include(extensionsPath,{name:"Message extensions", extensions:message.extensions(), schemaHelper, schemaPath}) %>
         <%- include(tagsPath,{name:"Message tags", tags:message.tags()}) %>
-<% }else if(message && message.incorrect) { %>
-    <h4>Message</h4>
-    <ul>
-        <% for (let ref of message.refs) { %>
-            <li><%= `${Object.values(ref || {})[0].split('/')[2]?.replaceAll('~1',' / ')} / ${Object.values(ref || {})[0].split('/').pop()}` %></li>
+<% } %>
+
+<% function renderObject(obj, indent) { %>
+    <% for (let key in obj) { %>
+        <% if (key != 'incorrect') { %>
+        <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
+            <li class="nested-object">
+                <span class="key"><%= key %>:</span>
+                <ul>
+                    <%= renderObject(obj[key], indent + 20) %>
+                </ul>
+            </li>
+        <% } else { %>
+            <li class="nested-object">
+                <span class="key"><%= key %>:</span>
+                <span class="value"><%= obj[key] %></span>
+            </li>
         <% } %>
-    </ul>
+        <% } %>
+    <% } %>
 <% } %>
 

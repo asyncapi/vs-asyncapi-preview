@@ -3,39 +3,39 @@
 <ul>
     <%  if (specId) { %>
         <li>
-            Specification ID: <%= specId %>
+            <b>Specification ID:</b> <%= specId %>
         </li>
         <% } %>
         <%  if (license) { %>
             <% if (license.url()) { %>
                 <li>
-                    License: <a href="<%= license.url() %>"> <%= license.name() %> </a>
+                    <b>License:</b> <a href="<%= license.url() %>"> <%= license.name() %> </a>
                 </li>
             <% }else { %>
                 <li>
-                    License: <a href="#"> <%= license.name() %> </a>
+                    <b>License:</b> <a href="#"> <%= license.name() %> </a>
                 </li>
             <% } %>   
         <% } %>  
         <%  if (termsOfService) { %>
             <li>
-                Terms of service: <%= termsOfService %>
+                <b>Terms of service:</b> <%= termsOfService %>
             </li>
         <% } %>
         <%  if (defaultContentType) { %>
             <li>
-                Default content type: <a href="https://www.iana.org/assignments/media-types/<%= defaultContentType %>"> <%= defaultContentType %> </a>
+                <b>Default content type:</b> <a href="https://www.iana.org/assignments/media-types/<%= defaultContentType %>"> <%= defaultContentType %> </a>
             </li>
         <% } %>
         <%  if (contact) { %>
             <%  if (contact.url()) { %>
                 <li>
-                    Support: <a href="<%= contact.url() %>"> <%= contact.name() || 'Link' %> </a>
+                    <b>Support:</b> <a href="<%= contact.url() %>"> <%= contact.name() || 'Link' %> </a>
                 </li>
             <% } %>
             <%  if (contact.email()) { %>
                 <li>
-                    Email support: <a href="<%= contact.email() %>"> <%= contact.email() %> </a>
+                    <b>Email support:</b> <a href="<%= contact.email() %>"> <%= contact.email() %> </a>
                 </li>
             <% } %>
         <% } %>

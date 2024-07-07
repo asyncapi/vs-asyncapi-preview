@@ -5,44 +5,46 @@
             <h3><%= server.id().charAt(0).toUpperCase() + server.id().slice(1) %> Server</h3>
                 <p>
                     <ul>
-                      <li>URL: <%= server.url() %></li>
-                      <li>Protocol: <%= server.protocol() %> <%= server.protocolVersion() ? server.protocolVersion() : '' %></li>
+                      <li><b>URL:</b> <%= server.url() || `<NIL>` %></li>
+                      <li><b>Protocol:</b> <%= server.protocol() %> <%= server.protocolVersion() ? server.protocolVersion() : null %></li>
                     </ul>
                     <% if(server.hasDescription()) { %>
                            <%- md.render(`Description: ${server.description()}`) %>
                     <% } %>
                 </p>
-            <h4>URL Variables</h4>
-            <div class="table-container">
-            <Table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Default value</th>
-                    <th>Allowed values</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% for(let entry of server.variables().all()){ %>
+            <% if(typeof server?.variables === 'function' && typeof server?.variables().all === 'function' && server.variables().all().length) { %>
+              <h4>URL Variables</h4>
+              <div class="table-container">
+              <Table>
+                  <thead>
                     <tr>
-                      <td data-th="Name"><%= entry.id() %></td>
-                      <td data-th="Description"><%= entry.description() %></td>
-                      <% if(entry.hasDefaultValue()){ %>
-                        <td data-th="Default value"><%= entry.defaultValue() %></td>
-                      <% }else { %>
-                        <td data-th="Default value">_None_</td>
-                      <% } %>
-                      <% if(entry.hasAllowedValues()){ %>
-                        <td data-th="Allowed values"><%= entry.allowedValues().map(value => value).join(', ') %></td>
-                      <% }else { %>
-                        <td data-th="Allowed values">_Any_</td>
-                      <% } %>
+                      <th>Name</th>
+                      <th>Description</th>
+                      <th>Default value</th>
+                      <th>Allowed values</th>
                     </tr>
-                  <% } %>
-                </tbody>
-              </Table>
-              </div>
+                  </thead>
+                  <tbody>
+                    <% for(let entry of server.variables().all()){ %>
+                      <tr>
+                        <td data-th="Name"><%= entry.id() %></td>
+                        <td data-th="Description"><%= entry.description() %></td>
+                        <% if(entry.hasDefaultValue()){ %>
+                          <td data-th="Default value"><%= entry.defaultValue() %></td>
+                        <% }else { %>
+                          <td data-th="Default value">_None_</td>
+                        <% } %>
+                        <% if(entry.hasAllowedValues()){ %>
+                          <td data-th="Allowed values"><%= entry.allowedValues().map(value => value).join(', ') %></td>
+                        <% }else { %>
+                          <td data-th="Allowed values">_Any_</td>
+                        <% } %>
+                      </tr>
+                    <% } %>
+                  </tbody>
+                </Table>
+                </div>
+            <% } %>    
             <%- include(securityPath,{ header:null, protocol: server.protocol(), security: server.security(), serverHelper, md }) %>
             <%- include(tagsPath,{ name:"Tags", tags: server.tags() }) %>
 

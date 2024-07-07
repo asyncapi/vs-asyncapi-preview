@@ -8,26 +8,26 @@
                    const servers = applyToAllServers ? [] : channel.servers().all(); 
                    const showInfoList = operation.operationId() || (servers && servers.length);
                  if (operation.isSend()) { 
-                     if (operation.reply() !== undefined) { 
+                     if (operation.reply()) { 
                      type = 'request'; 
                      } else { 
                      type = 'send'; 
                      } 
                  } else if (operation.isReceive()) { 
-                     if (operation.reply() !== undefined) { 
+                     if (operation.reply()) { 
                      type = 'reply';
                      } else { 
                      type = 'receive'; 
                      } 
                  } %>
-                <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` Operation`) %>
+                <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` <b>Operation</b>`) %>
                 <% if(operation.summary()) { %>
                     <%- md.render(`*${operation.summary().trim()}*`) %> 
                 <% } %>
                 <% if(showInfoList) { %>
                     <ul>
                         <% if(operation.operationId()) { %>
-                            <li>Operation ID: <%= operation.operationId() %></li>
+                            <li><b>Operation ID:</b> <%= operation.operationId() %></li>
                             <% if(servers && servers.length) { %>
                                 <li>Available Only on Server:
                                      <%= servers.map(s => {
@@ -46,8 +46,8 @@
                 <% if(operation.hasDescription()) { %>
                     <%- md.render(operation.description()) %>
                 <% } %>
-                <% if(operation.externalDocs()) { %>
-                      <a href={operation.externalDocs().url()}><%= (operation.externalDocs().description() || 'Find more info here.') %></a>
+                <% if(operation.externalDocs()?.hasDescription() ) { %>
+                      <a href="<%= operation.externalDocs().url() %>"><%= (operation.externalDocs().description() || 'Find more info here.') %></a>
                 <% } %>
 
                 <%- include(tagsPath,{ name:"Operation tags", tags: operation.tags() }) %>
@@ -78,12 +78,37 @@
                     <% } %>
                 <% } %>
 
+                <% if(operation.traits().incorrect  && Object.values(operation.traits() || []).length > 1) { %>
+                <div>
+                    <h5>Operation Traits</h5>
+                    <ul><%= renderObject(operation.traits(), 0) %></ul>
+                </div>
+            <% } %>
+
             <% } %>
         <% } %>    
     <% } %>
 <% } %>
 
-
+<% function renderObject(obj, indent) { %>
+    <% for (let key in obj) { %>
+        <% if (key != 'incorrect') { %>
+        <% if (typeof obj[key] === 'object' && obj[key] !== null) { %>
+            <li class="nested-object">
+                <span class="key"><%= key %>:</span>
+                <ul>
+                    <%= renderObject(obj[key], indent + 20) %>
+                </ul>
+            </li>
+        <% } else { %>
+            <li class="nested-object">
+                <span class="key"><%= key %>:</span>
+                <span class="value"><%= obj[key] %></span>
+            </li>
+        <% } %>
+        <% } %>
+    <% } %>
+<% } %>
 
 <% function getRenderedTypeForOperation({type}) { 
    if (isV3) { 

@@ -75,6 +75,10 @@ export default async function flowchart(asyncapi: any, context: vscode.Extension
                     });
                 }
             });
+            channelInfo.servers?.map((server: any)=>{
+                if(typeof server === "string")
+               {data.relations.push(`${channelName} --> ${server.replace(/~1/gi,"/")}`);}              
+            });
         }
     });
 

@@ -14,56 +14,47 @@ import ClassDiagram from './ClassDiagram';
 const parser = new Parser();
 parser.registerSchemaParser(AvroSchemaParser());
 
- function parsedAsyncapiPreview(){
-
-    const editor: any = vscode.window.activeTextEditor;
-    if(!editor) {return;}
-    const document = editor.document;
-    const filePath: any = document?.fileName;
-    const fullPath = path.resolve(filePath);
-    const content = fs.readFileSync(fullPath, 'utf8');
-
-
-    let parsedData;
-    if (filePath.endsWith('.json')) {
-      parsedData = JSON.parse(content);
-    } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-      parsedData = parse(content);
-    } else {
-      vscode.window.showInformationMessage('Unsupported file type.');
-      return;
-    }
-    return parsedData || "";
+function parsedAsyncapiPreview(){
+  
+  const editor: any = vscode.window.activeTextEditor;
+  if(!editor) {return;}
+  const document = editor.document;
+  const filePath: any = document?.fileName;
+  const fullPath = path.resolve(filePath);
+  const content = fs.readFileSync(fullPath, 'utf8');
+  
+  
+  let parsedData;
+  if (filePath.endsWith('.json')) {
+    parsedData = JSON.parse(content);
+  } else if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
+    parsedData = parse(content);
+  } else {
+    vscode.window.showInformationMessage('Unsupported file type.');
+    return;
+  }
+  return parsedData || "";
 }
 
 
 
 async function buildMarkdown(document: any, diagnostics: ISpectralDiagnostic[], context: vscode.ExtensionContext){
-
-
-  let content = '';
-
+  
+  
+  let content: any = '';
+  
   if(document !== undefined){
-    vscode.window.onDidChangeActiveTextEditor(()=>null);
     document.isAsyncapiParser = true;
-    content = await Asyncapi(document, context);
+    content = await Asyncapi(document, context) || "";
   }else{
-    content = await Diagnostics(diagnostics, context);
-    vscode.window.onDidChangeActiveTextEditor(async()=>{
-      
-      let parsedData: any = parsedAsyncapiPreview();
-      if(parsedData){
-        parsedData.isAsyncapiParser = false;
-        content += await Asyncapi(parsedData, context);
-      }
-    });
     let parsedData: any = parsedAsyncapiPreview();
     if(parsedData){
       parsedData.isAsyncapiParser = false;
-      content += await Asyncapi(parsedData, context);
+      content = await Diagnostics(diagnostics, context);
+      content += await Asyncapi(parsedData, context) || "";
     }
   }
-
+  
   return content;
 
 }
@@ -149,6 +140,9 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   const panzoomJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/panzoom/dist/panzoom.min.js')
   );
+  const turndownJs = webview.asWebviewUri(
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/turndown/dist/turndown.js')
+  );
   const globalsCSS = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/globals.css')
   );
@@ -187,16 +181,20 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         <button class="button" onclick="moveToSection('section3')">Class Diagram</button>
       </div>
       
-      
+      <div id="copy-button"><b>Copy</b></div>
+      <div id="copied-indicator">Copied!</div>
 
       <script src="${mermaidJs}"></script>
       <script src="${panzoomJs}"></script>
+      <script src="${turndownJs}"></script>
       <script>
         let sectionElement;
         let zoomLevelSpan = document.getElementById('flowchart_zoom-level');
         let scrollPositionSpan = document.getElementById('flowchart_scroll-position');
         const controlPanel = document.getElementById('control-panel');
         const zoomInfo = document.getElementById('zoom-info');
+        var turndownService = new TurndownService();
+        turndownService.keep(['table','tr','th','td']);
 
         mermaid.initialize({ 
           "startOnLoad": true ,
@@ -321,10 +319,28 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
                 const { x, y } = panZoomClassDiagramInstance.getTransform()
                 panZoomClassDiagramInstance.smoothMoveTo(x+50, y);
               }
-            });
-
-            
+            });            
         });
+
+        document.getElementById('copy-button').addEventListener('click', function() {
+            const textToCopy = turndownService.turndown(document.getElementById('turndown'));
+            
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                showCopiedIndicator()
+            }).catch(function(error) {
+                console.error('Failed to copy text: ', error);
+            });
+        });
+
+        function showCopiedIndicator() {
+            const indicator = document.getElementById('copied-indicator');
+            indicator.style.top = "10px";
+            setTimeout(()=>{
+              indicator.style.top = "-50px";
+            },2000);            
+            console.log("reomved");
+
+        }
 
         window.addEventListener("resize",()=>{
             sectionElement.scrollIntoView({ behavior: 'smooth' });

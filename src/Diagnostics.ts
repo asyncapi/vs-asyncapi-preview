@@ -10,7 +10,6 @@ export default async function diagnosticsMarkdown(diagnostics: ISpectralDiagnost
     let joinedPath: string = "";
     diagnostics.forEach(diagnostic =>{
         joinedPath = diagnostic.path.join(' / ');
-        console.log(joinedPath, recentErrorPath, data.length);
         if(joinedPath.indexOf(recentErrorPath) === -1 || !recentErrorPath){
             recentErrorPath = joinedPath;
             data.push({

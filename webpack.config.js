@@ -67,6 +67,9 @@ const extensionConfig = {
         {
           from: 'node_modules/panzoom/dist/panzoom.min.js',
           to: 'node_modules/panzoom/dist/panzoom.min.js',
+        },{
+          from: 'node_modules/turndown/dist/turndown.js',
+          to: 'node_modules/turndown/dist/turndown.js',
         },
         {
           from: 'src/components',

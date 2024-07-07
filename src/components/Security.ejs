@@ -27,14 +27,14 @@
                              const type = securitySchema?.type() && serverHelper.securityType(securitySchema.type()); %>
                             <ul>
                                 <% if(type) { %>
-                                    <li>Type: <%= type %></li>
+                                    <li><b>Type:</b> <%= type %></li>
                                 <% } %>
                                 <% if(schemas.length > 0) { %>
                                     <% for(let schema of schemas) { %>                                     
                                         <% if(schema.split('_')[0] == 'OpenID') { %>
-                                            <li>OpenID Connect URL: <a href="<%= schema.split('_')[1] %>"><%= schema.split('_')[2] %></a></li>
+                                            <li><b>OpenID Connect URL:</b> <a href="<%= schema.split('_')[1] %>"><%= schema.split('_')[2] %></a></li>
                                         <% }else if(schema.split('_')[0] == 'RequiredScopes'){ %>
-                                            <li>Required Scopes: <%= schema.split('_')[1]? schema.split('_')[1]: 'Nil' %></li>
+                                            <li><b>Required Scopes:</b> <%= schema.split('_')[1]? schema.split('_')[1]: 'Nil' %></li>
                                             <div class="table-container">
                                             <Table>
                                                 <thead>
@@ -108,7 +108,6 @@
   
 
     function flowsRenderer([flowName, flow]) { 
-      console.log(flow);
       return [serverHelper.flowName(flowName) || '-', (flow?.authorizationUrl() ? flow.authorizationUrl() : '-'), (flow?.tokenUrl() ? flow.tokenUrl() : '-'), (flow?.refreshUrl() ? flow.refreshUrl() : '-'), Object.keys(flow?.scopes() || {}).length ? Object.keys(flow.scopes()).map(v => `\`${v}\``).join(', ') : '-' ]; 
     } 
    function renderSecuritySchemasFlows({ securitySchema, requiredScopes, schemas }) { 
