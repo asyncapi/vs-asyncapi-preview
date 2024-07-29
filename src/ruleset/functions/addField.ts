@@ -7,23 +7,29 @@ import { JSONPath } from 'jsonpath-plus';
 
 export default function addField(document: vscode.TextDocument, range: vscode.Range, given: string, field: string) {
     const documentContent = document.getText();
-    console.log("given: ", given);
+    console.log(typeof documentContent, typeof range);
+    console.log(range.start);
     try {
         let jsonObject = yaml.load(documentContent);
-        console.log(jsonObject);
         const queryResult = JSONPath({
             path: given, json: jsonObject, resultType: 'all'
         });
         for (const result of queryResult) {
-            console.log("query result", result);
             const exampleFix = JSONPath({
                 json: goodExamples, path: given, resultType: 'all'
             });
             for (const example of exampleFix) {
-                console.log("example: ", example);
                 if (example.parentProperty === result.parentProperty) {
-                    console.log("result: ", result);
-                    result.value[field] = example.value[field];
+                    if (!result.value.hasOwnProperty(field)) {
+                        result.value[field] = example.value[field];
+                    }
+                    else {
+                        for (const key of Object.keys(example.value[field])) {
+                            if (!result.value[field].hasOwnProperty(key)) {
+                                result.value[field][key] = example.value[field][key];
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -1,0 +1,47 @@
+asyncapi: 2.5.0
+info:
+  title: Example API
+  version: 1.0.0
+  license:
+    name: MIT
+  contact:
+    name: A-Team
+    email: a-team@goarmy.com
+    url: https://goarmy.com/apis/support
+  description: Description of the API
+servers:
+  production:
+    url: api.example.com/{basePath}
+    protocol: https
+    variables:
+      basePath:
+        default: v1
+        enum:
+          - v1
+          - v2
+  development:
+    url: dev.api.example.com
+    protocol: https
+channels:
+  exampleChannel:
+    subscribe:
+      description: description
+      operationId: exampleOperation
+      summary: Example operation
+      message:
+        contentType: application/json
+        headers:
+          type: object
+          properties:
+            headerProperty1:
+              type: string
+        payload:
+          type: object
+          properties:
+            exampleProperty:
+              type: string
+        examples:
+          - headers:
+              headerProperty1: exampleValue
+            payload:
+              exampleProperty: exampleString

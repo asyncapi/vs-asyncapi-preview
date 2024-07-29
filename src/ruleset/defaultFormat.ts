@@ -1,5 +1,16 @@
 export default {
     // Contains good examples
+    tags: [
+        {
+            name: "user",
+            description: "Operations related to users"
+
+        },
+        {
+            name: "order",
+            description: "Operations related to order"
+        },
+    ],
     info: {
         contact: {
             name: "A-Team",
@@ -7,9 +18,9 @@ export default {
             url: "https://goarmy.com/apis/support",
         },
         license: {
-            name: "MIT",
-            url: "https://www.tldrlegal.com/l/mit",
+            name: "MIT"
         },
+        description: "Description of the API"
     },
     channels: {
         testchannel: {

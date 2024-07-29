@@ -10,10 +10,12 @@ export default function performFix(document: vscode.TextDocument, range: vscode.
         vscode.CodeActionKind.QuickFix
     );
     fix.edit = new vscode.WorkspaceEdit();
+
     try {
         const fullDocRange = new vscode.Range(document.positionAt(0), document.lineAt(document.lineCount - 1).range.end);
         const edit = vscode.TextEdit.replace(fullDocRange, quickFixObj);
         fix.edit.set(document.uri, [edit]);
+        console.log("Received code action!");
     } catch (error) {
         console.error("Failed to parse document content as YAML", error);
     }
