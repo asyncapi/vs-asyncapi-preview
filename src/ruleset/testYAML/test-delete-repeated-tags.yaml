@@ -11,6 +11,11 @@ tags:
       url: https://time.example.com/docs
   - name: user
     description: Operations related to users
+  - name: server
+    description: Opearations related to order
+    externalDocs:
+      description: More info about time
+      url: https://time.example.com/docs
 info:
   title: Example API
   version: 1.0.0

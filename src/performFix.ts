@@ -4,7 +4,7 @@ interface CustomCodeAction extends vscode.CodeAction {
     [key: string]: any;
 }
 
-export default function performFix(document: vscode.TextDocument, range: vscode.Range, fixName: string, quickFixObj: string): vscode.CodeAction {
+export default async function performFix(document: vscode.TextDocument, range: vscode.Range, fixName: string, quickFixObj: string): vscode.CodeAction {
     const fix: CustomCodeAction = new vscode.CodeAction(
         fixName,
         vscode.CodeActionKind.QuickFix
@@ -16,6 +16,16 @@ export default function performFix(document: vscode.TextDocument, range: vscode.
         const edit = vscode.TextEdit.replace(fullDocRange, quickFixObj);
         fix.edit.set(document.uri, [edit]);
         console.log("Received code action!");
+
+        // Apply the edit
+        const applied = await vscode.workspace.applyEdit(fix.edit);
+        if (applied) {
+            // Save the document to update diagnostics
+            await document.save();
+            console.log("Document saved after applying fix.");
+        } else {
+            console.warn("The workspace edit was not applied.");
+        }
     } catch (error) {
         console.error("Failed to parse document content as YAML", error);
     }
