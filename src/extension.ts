@@ -49,20 +49,22 @@ export function activate(context: vscode.ExtensionContext) {
     const quickFixObj = await fixFunction(document, range, given, field);
     console.log('QuickFixObj received: ', quickFixObj);
     // Apply the quick fix using the performFix method
-    const fixAction = performFix(document, range, fixFunction.name, quickFixObj);
-    if (fixAction.edit) {
-      const edit = new vscode.WorkspaceEdit();
-      fixAction.edit.entries().forEach(([uri, textEdits]) => {
-        edit.set(uri, textEdits);
-      });
+    if (quickFixObj !== undefined) {
+      const fixAction = performFix(document, range, fixFunction.name, quickFixObj);
+      if (fixAction.edit) {
+        const edit = new vscode.WorkspaceEdit();
+        fixAction.edit.entries().forEach(([uri, textEdits]) => {
+          edit.set(uri, textEdits);
+        });
 
-      const disposable = vscode.workspace.onDidChangeTextDocument(event => {
-        if (event.document.uri.toString() === document.uri.toString()) {
-          console.log('CodeAction applied:', fixAction.title);
-          disposable.dispose(); // Remove the event listener after the change is detected
-        }
-      });
-      await vscode.workspace.applyEdit(edit);
+        const disposable = vscode.workspace.onDidChangeTextDocument(event => {
+          if (event.document.uri.toString() === document.uri.toString()) {
+            console.log('CodeAction applied:', fixAction.title);
+            disposable.dispose(); // Remove the event listener after the change is detected
+          }
+        });
+        await vscode.workspace.applyEdit(edit);
+      }
     }
   }));
 

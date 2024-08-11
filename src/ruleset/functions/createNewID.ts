@@ -8,7 +8,7 @@ function getMessageIDMap(documentContent: string, given: string, field: string) 
     try {
         let jsonObject = yaml.load(documentContent);
         const queryResult = JSONPath({
-            path: given, json: jsonObject, resultType: 'all'
+            path: given, json: jsonObject as any, resultType: 'all'
         });
         for (const result of queryResult) {
             IDMap.add(result.value);

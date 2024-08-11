@@ -1,26 +1,16 @@
 import * as vscode from 'vscode';
-import * as yaml from 'js-yaml';
-import { JSONPath } from 'jsonpath-plus';
 import { latestVersion } from '../../AutoFixProvider';
-
-export type AsyncAPISpecVersion = keyof typeof specs;
 
 export default function latestVersionUpdate(document: vscode.TextDocument, range: vscode.Range, given: string, field: string) {
     const documentContent = document.getText();
+    const start = new vscode.Position(range.start.line, 0);
+    const end = new vscode.Position(range.end.line, document.lineAt(range.end.line).text.length);
+    const lines = documentContent.split('\n');
     try {
-        let jsonObject = yaml.load(documentContent);
-        const queryResult = JSONPath({
-            path: given, json: jsonObject, resultType: 'all'
-        });
-        for (const result of queryResult) {
-            if (field !== null && latestVersion !== undefined) {
-                console.log(result.value, latestVersion);
-                result.value[field] = latestVersion;
-            }
-        }
-        const yamlText = yaml.dump(jsonObject, { indent: 2 });
-        return yamlText;
+        lines[start.line] = `asyncapi: ${latestVersion}`;
     } catch (error) {
-        console.error("Failed to parse document content as YAML", error);
+        console.error("Failed to update latest version", error);
     }
+
+    return lines.join('\n');
 }

@@ -12,7 +12,7 @@ export default function addField(document: vscode.TextDocument, range: vscode.Ra
     try {
         let jsonObject = yaml.load(documentContent);
         const queryResult = JSONPath({
-            path: given, json: jsonObject, resultType: 'all'
+            path: given, json: jsonObject as any, resultType: 'all'
         });
         for (const result of queryResult) {
             const exampleFix = JSONPath({
@@ -37,5 +37,6 @@ export default function addField(document: vscode.TextDocument, range: vscode.Ra
         return yamlText;
     } catch (error) {
         console.error("Failed to parse document content as YAML", error);
+        return documentContent;
     }
 }

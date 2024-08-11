@@ -34,7 +34,8 @@ channels:
             totalAmount:
               type: number
       description: Description for subscribe
-  order/created////:
+  order/created:
     description: Channel for user signup events
   user/noted:
     description: Channel for user signup events
+  user: null

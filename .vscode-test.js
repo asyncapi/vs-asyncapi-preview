@@ -4,6 +4,8 @@ module.exports = defineConfig({
     files: 'src/ruleset/functions/test/*.test.ts',
 
     mocha: {
-        require: ['ts-node/register']
+        require: ['ts-node/register'],
+        // timeout: 5000,
+        // ui: 'bdd'
     }
 });

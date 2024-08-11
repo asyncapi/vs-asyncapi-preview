@@ -1,17 +1,18 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import performFix from './performFix';
 import ruleset from "./ruleset/asyncapi-rules";
 
 let latestVersion: string | undefined;
 
 export interface FixFunction {
-    (document: vscode.TextDocument, range: vscode.Range, given: string, field: string): string; // Consider defining a more specific return type than 'any'
+    (document: vscode.TextDocument, range: vscode.Range, given: string, field: string): string | undefined | Promise<string | undefined>;
 }
+
+
 
 interface FixObject {
     name: string;
-    given: string;
+    given: string | string[];
     field: string;
     function: FixFunction;
 }
@@ -19,10 +20,6 @@ interface Rule {
     description: string;
     recommended: boolean;
     given: string;
-    then: {
-        field: string;
-        function: string;
-    };
     fix: FixObject | FixObject[];
 }
 
@@ -87,7 +84,7 @@ class DiagnosticFixProvider implements vscode.CodeActionProvider {
             return undefined;
         }
 
-        const rule = ruleset.rules[code];
+        const rule = ruleset.rules[code as keyof typeof ruleset.rules];
 
         if (!rule) {
             console.error(`No rule found for code: ${code}`);

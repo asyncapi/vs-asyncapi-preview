@@ -11,7 +11,6 @@ import renameRepeatedTag from './functions/renameRepeatedTag';
 import addDescription from './functions/addDescription';
 import deleteEmptyVariables from './functions/deleteEmptyVariables';
 import updateURL from './functions/updateURL';
-import defineInServersObject from './functions/defineInServersObject';
 
 export default {
     rules: {
@@ -22,7 +21,7 @@ export default {
             fix: {
                 name: 'Quick fix - Delete ending slashes of channel paths',
                 given: '$.channels.',
-                field: null,
+                field: '',
                 function: deleteEndingSlash,
             }
         },
@@ -36,9 +35,6 @@ export default {
                 field: 'url',
                 function: deleteEndingSlash,
             }
-        },
-        'asyncapi-channel-parameters': {
-            description: 'Channel parameters must be defined and there must be no redundant parameters.',
         },
         'asyncapi-info-contact-properties': {
             description: 'Contact object must have "name", "url" and "email".',
@@ -65,6 +61,7 @@ export default {
         "asyncapi-info-description": {
             description: 'Info "description" must be present and non-empty string.',
             recommended: true,
+            given: "$",
             fix: {
                 name: 'Quick fix - Add description object to info',
                 given: '$.info',
@@ -87,10 +84,6 @@ export default {
             description: 'Operation "description" must be present and non-empty string.',
             recommended: true,
             given: '$.channels.*.[publish,subscribe]',
-            then: {
-                field: 'description',
-                function: 'truthy',
-            },
             fix: {
                 name: 'Quick fix - Add description for operation',
                 given: '$.channels.*.[publish,subscribe]',
@@ -101,6 +94,7 @@ export default {
         'asyncapi-latest-version': {
             description: 'Checking if the AsyncAPI document is using the latest version.',
             recommended: true,
+            given: "$",
             fix: {
                 name: 'Quick fix - Update the version to latest',
                 given: '$',
@@ -111,6 +105,7 @@ export default {
         'asyncapi-tags': {
             description: 'AsyncAPI object must have non-empty "tags" array.',
             recommended: true,
+            given: "$",
             fix: {
                 name: 'Quick fix - Add tags',
                 given: '$',
@@ -121,11 +116,12 @@ export default {
         'asyncapi-channel-no-empty-parameter': {
             description: 'Channel path must not have empty parameter substitution pattern.',
             recommended: true,
+            given: "$",
             fix: [
                 {
                     name: 'Quick fix - delete empty params',
                     given: '$.channels.',
-                    field: null,
+                    field: '',
                     function: deleteEmptyParam
                 },
                 {
@@ -138,8 +134,9 @@ export default {
             ]
         },
         "asyncapi-message-messageId-uniqueness": {
-            desciption: '',
+            description: 'messageId must be unique across all the messages (except those one defined in the components)',
             recommended: true,
+            given: "$",
             fix: [
                 {
                     name: 'Quick fix - delete messageId',
@@ -158,6 +155,7 @@ export default {
         "asyncapi-operation-operationId": {
             description: 'Operation must have "operationId".',
             recommended: true,
+            given: '$',
             fix: {
                 name: 'Quick fix - create an operationId',
                 given: '$.channels[*][publish,subscribe]',
@@ -167,8 +165,9 @@ export default {
             }
         },
         "asyncapi-operation-operationId-uniqueness": {
-            desciption: '"operationId" must be unique across all the operations.',
+            description: '"operationId" must be unique across all the operations.',
             recommended: true,
+            given: "$",
             fix: [
                 {
                     name: 'Quick fix - delete operationId',
@@ -187,6 +186,7 @@ export default {
         "asyncapi-tags-uniqueness": {
             description: 'Each tag must have a unique name.',
             recommended: true,
+            given: "$",
             fix: [
                 {
                     name: 'Quick fix - delete repeated tag',
@@ -258,28 +258,20 @@ export default {
         },
         "asyncapi-server-no-empty-variable": {
             description: 'Server URL must not have empty variable substitution pattern.',
+            recommended: true,
             given: '$.servers[*].url',
             fix: [
                 {
                     name: 'Quick fix - delete empty variables',
-                    field: null,
+                    given: '',
+                    field: '',
                     function: deleteEmptyVariables
                 },
                 {
                     name: 'Quick fix - Update url',
-                    field: null,
+                    given: '',
+                    field: '',
                     function: updateURL
-                }
-            ]
-        },
-        "asyncapi-channel-servers": {
-            description: 'Channel servers must be defined in the "servers" object.',
-            given: "$",
-            fix: [
-                {
-                    name: 'Quick fix - Define in "servers" object',
-                    field: null,
-                    function: defineInServersObject
                 }
             ]
         }

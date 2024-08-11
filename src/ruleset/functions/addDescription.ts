@@ -45,8 +45,8 @@ export default async function addDescription(document: vscode.TextDocument, rang
         console.log(`tabSize is ${tabSize}`);
         lines.splice(range.start.line + 1, 0, getLeadingSpaces(lines[range.start.line]) + ' '.repeat(tabSize) + newText);
 
-        return lines.join('\n');
     } catch (error) {
         console.error("Failed to show input box.", error);
     }
+    return lines.join('\n');
 }

@@ -12,6 +12,7 @@ export default async function renameRepeatedTag(document: vscode.TextDocument, r
     }
     const selectedText = document.getText(new vscode.Range(start, end));
     const lines = documentContent.split('\n');
+    console.log("line is ", start.line);
     try {
         const paramName = await vscode.window.showInputBox({
             prompt: 'Enter the name for the tag',
