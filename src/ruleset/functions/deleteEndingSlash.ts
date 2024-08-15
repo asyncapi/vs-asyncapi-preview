@@ -1,12 +1,9 @@
 import * as vscode from 'vscode';
 
 function deletionHelper(target: string) {
-    if (target.charAt(target.length - 1) !== ':') {
-        return target.replace(/\/+$/, '');
-    }
-    else {
-        return target.replace(/\/+:$/, ':');
-    }
+    target = target.replace(/\/+$/, '');
+    target = target.replace(/\/+(.)$/, '$1');
+    return target;
 }
 
 export default function deleteEndingSlash(document: vscode.TextDocument, range: vscode.Range, given: string, field: string) {

@@ -1,0 +1,17 @@
+asyncapi: 2.5.0
+channels:
+  user/{123123123}/{}/created:
+    description: Channel for user creation events.
+    subscribe:
+      description: 123
+      summary: Receive user creation events
+      operationId: receiveUserCreated
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            userId:
+              type: string
+            userName:
+              type: string

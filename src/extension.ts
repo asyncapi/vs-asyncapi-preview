@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('QuickFixObj received: ', quickFixObj);
     // Apply the quick fix using the performFix method
     if (quickFixObj !== undefined) {
-      const fixAction = performFix(document, range, fixFunction.name, quickFixObj);
+      const fixAction = await performFix(document, range, fixFunction.name, quickFixObj);
       if (fixAction.edit) {
         const edit = new vscode.WorkspaceEdit();
         fixAction.edit.entries().forEach(([uri, textEdits]) => {

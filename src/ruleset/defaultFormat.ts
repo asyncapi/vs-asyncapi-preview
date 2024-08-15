@@ -2,23 +2,25 @@ export default {
     // Contains good examples
     tags: [
         {
-            name: "user",
-            description: "Operations related to users"
+            name: "tag1",
+            description: "Operations related to tag1"
 
         },
         {
-            name: "order",
-            description: "Operations related to order"
+            name: "tag2",
+            description: "Operations related to tag2"
         },
     ],
     info: {
+        title: 'Example API',
         contact: {
             name: "A-Team",
             email: "a-team@goarmy.com",
             url: "https://goarmy.com/apis/support",
         },
         license: {
-            name: "MIT"
+            name: "license name",
+            url: "https://licenseurlexample.com"
         },
         description: "Description of the API"
     },

@@ -10,7 +10,6 @@ export default async function deleteID(document: vscode.TextDocument, range: vsc
     if (editor) {
         editor.selections = [selection];
     }
-    // const selectedText = document.getText(new vscode.Range(start, end));
     const lines = documentContent.split('\n');
     try {
         if (range.start.line > -1) {
@@ -18,6 +17,6 @@ export default async function deleteID(document: vscode.TextDocument, range: vsc
         }
         return lines.join('\n');
     } catch (error) {
-        console.error("Failed to show input box.", error);
+        console.error("Failed to delete ID.", error);
     }
 }

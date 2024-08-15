@@ -8,7 +8,7 @@ suite('deleteEndingSlash Test Suite', () => {
    * TEST: delete one-line endling slash
    */
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 1', async () => {
     const documentContent = `
 user/:
     `;
@@ -31,7 +31,7 @@ user:
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 2', async () => {
     const documentContent = `
 user//:
     `;
@@ -54,7 +54,7 @@ user:
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 3', async () => {
     const documentContent = `
 user////:
     `;
@@ -77,7 +77,7 @@ user:
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 4', async () => {
     const documentContent = `
 user/
     `;
@@ -100,7 +100,7 @@ user
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 5', async () => {
     const documentContent = `
 user//
     `;
@@ -123,7 +123,7 @@ user
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 6', async () => {
     const documentContent = `
 user////
     `;
@@ -150,7 +150,7 @@ user
    * TEST delete ending slashes for one of channels
    */
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 7', async () => {
     const documentContent = `
 channels:
   order/{us}/created///:
@@ -211,7 +211,7 @@ channels:
 
   });
 
-  test('deleteEndingSlash should delete ending slashes from the file', async () => {
+  test('deleteEndingSlash test 8', async () => {
     const documentContent = `
 channels:
   order/{us}/created:

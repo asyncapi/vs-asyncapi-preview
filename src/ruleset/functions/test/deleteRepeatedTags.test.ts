@@ -8,7 +8,7 @@ suite('deleteRepeatedTags Test Suite', () => {
    * TEST: delete one-line repeated tag
    */
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 1', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -38,7 +38,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 2', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -68,7 +68,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 3', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -96,7 +96,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 4', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -126,7 +126,7 @@ tags:
    * TEST: Delte repeated tags and its descendant items
    */
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 5', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -176,7 +176,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 6', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -219,7 +219,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 7', async () => {
     const documentContent = `
 tags:
   - name: order
@@ -261,7 +261,7 @@ tags:
 
   });
 
-  test('deleteRepeatedTags should delete repeated tags from the file', async () => {
+  test('deleteRepeatedTags test 8', async () => {
     const documentContent = `
 tags:
   - name: order

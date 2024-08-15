@@ -4,23 +4,27 @@ import { JSONPath } from 'jsonpath-plus';
 import { off } from 'process';
 
 const emptyCurlyBracesPattern = /\{\}/g;
+const extraDotsPattern = /\.\./g;
+const trailingSlashesPattern = /\/\//g;
 
 function deletionHelper(target: string) {
-    target = target.replace(emptyCurlyBracesPattern, '');
-    console.log("Replace curly braces:", target);
-    target = target.replace(/\/\./g, '');
-    target = target.replace(/\/\//g, '/');
-    target = target.replace(/\.\./g, '.');
-    console.log("Replace double slashes", target);
-    if (target.endsWith('/')) {
-        target = target.replace(/\/+$/, '');
+    // Replace nested empty curly braces until none are left
+    while (emptyCurlyBracesPattern.test(target)) {
+        target = target.replace(emptyCurlyBracesPattern, '');
     }
-    if (target.startsWith('{')) {
-        target = '/' + target;
+    // Replace extra dots until only one are left
+    while (extraDotsPattern.test(target)) {
+        target = target.replace(extraDotsPattern, '.');
     }
-    if (target.startsWith('.')) {
-        target = target.slice(1);
+    // Replace extra slashes until none
+    while (trailingSlashesPattern.test(target)) {
+        target = target.replace(trailingSlashesPattern, '/');
     }
+    target = target.replace(/\.$/g, '');
+    target = target.replace(/^\./g, '');
+    target = target.replace(/^\{/g, '/{');
+    target = target.replace(/\/+$/, '');
+    target = target.replace(/\.+$/g, '');
 
     return target;
 }
@@ -37,13 +41,12 @@ export default function deleteEmptyVariables(document: vscode.TextDocument, rang
     }
     const selectedText = document.getText(new vscode.Range(start, end));
     const lines = documentContent.split('\n');
-    const splitText = selectedText.split('url: ');
+    const splitText = selectedText.split(':');
     if (splitText) {
-        splitText[splitText.length - 1] = deletionHelper(splitText[splitText.length - 1]);
-        const newText = splitText.join('url: ');
+        let removeLeadingSpaceStr = splitText[splitText.length - 1].trimStart();
+        splitText[splitText.length - 1] = ' '.repeat(splitText[splitText.length - 1].length - removeLeadingSpaceStr.length) + deletionHelper(removeLeadingSpaceStr);
+        const newText = splitText.join(':');
         lines[range.start.line] = newText;
     }
-    console.log("Selected text: \n", selectedText, range.start.line, range.end.line);
-    console.log(selectedText.split(' '));
     return lines.join('\n');
 }

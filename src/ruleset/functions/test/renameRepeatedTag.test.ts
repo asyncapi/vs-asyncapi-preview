@@ -156,7 +156,6 @@ tags:
     description: Operations related to users
     `;
     inputBoxStub.restore();
-    console.log('Expected:', expected.trim());
     assert.ok(result, 'The result is undefined, the test failed.');
     assert.strictEqual(result.trim(), expected.trim());
 
@@ -314,7 +313,7 @@ tags:
 * TEST: No input
 */
 
-  test('renameRepeatedTag test 1', async () => {
+  test('renameRepeatedTag test 8', async () => {
     const documentContent = `
 tags:
   - name: order

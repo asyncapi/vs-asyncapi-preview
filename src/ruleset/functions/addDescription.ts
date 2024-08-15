@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
 function getLeadingSpaces(target: string): string {
-    console.log("target: ", target);
     let res = '';
     for (const c of target) {
         if (c === ' ') {
@@ -24,7 +23,6 @@ export default async function addDescription(document: vscode.TextDocument, rang
         editor.selections = [selection];
     }
     const selectedText = document.getText(new vscode.Range(start, end));
-    console.log("Selected text: \n", selectedText, range.start.line, range.end.line);
     const lines = documentContent.split('\n');
     try {
         const description = await vscode.window.showInputBox({
@@ -36,14 +34,15 @@ export default async function addDescription(document: vscode.TextDocument, rang
                 return null;
             }
         });
-        const newText = `description: ${description}`
+        const newText = `description: ${description}`;
         // Add operation
         let tabSize = 0;
         if (editor) {
             tabSize = editor.options.tabSize as number;
         }
-        console.log(`tabSize is ${tabSize}`);
-        lines.splice(range.start.line + 1, 0, getLeadingSpaces(lines[range.start.line]) + ' '.repeat(tabSize) + newText);
+        if (description) {
+            lines.splice(range.start.line + 1, 0, getLeadingSpaces(lines[range.start.line]) + ' '.repeat(tabSize) + newText);
+        }
 
     } catch (error) {
         console.error("Failed to show input box.", error);

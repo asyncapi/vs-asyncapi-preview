@@ -22,10 +22,13 @@ export default async function updateURL(document: vscode.TextDocument, range: vs
                 if (/\{\}/.test(value)) {
                     return 'URL cannot have empty variables.';
                 }
+                if (/ |\t/.test(value)) {
+                    return 'URL cannot have whitespace characters.';
+                }
                 return null;
             }
         });
-        const newText = selectedText.replace(/url: .*/g, `url: ${paramName ? paramName : ''}`);
+        const newText = selectedText.replace(/: .*/g, `: ${paramName ? paramName : ''}`);
         lines[range.start.line] = paramName ? newText : selectedText;
         return lines.join('\n');
     } catch (error) {

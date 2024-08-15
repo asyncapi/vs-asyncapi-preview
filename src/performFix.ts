@@ -4,7 +4,7 @@ interface CustomCodeAction extends vscode.CodeAction {
     [key: string]: any;
 }
 
-export default async function performFix(document: vscode.TextDocument, range: vscode.Range, fixName: string, quickFixObj: string): vscode.CodeAction {
+export default async function performFix(document: vscode.TextDocument, range: vscode.Range, fixName: string, quickFixObj: string): Promise<vscode.CodeAction> {
     const fix: CustomCodeAction = new vscode.CodeAction(
         fixName,
         vscode.CodeActionKind.QuickFix

@@ -19,7 +19,7 @@ servers:
     url: api.example.com
     protocol: amqp
 channels:
-  order/{us}/created:
+  /order/{us}/created=
     description: Channel for order creation events
     subscribe:
       summary: Receive order creation events
@@ -34,10 +34,9 @@ channels:
             totalAmount:
               type: number
       description: Description for subscribe
-  order//server: null
   order/created:
     description: blah blah
-  created2/{}/order2:
+  /created2/{}/order2:
     description: blah blah
   create1/order1:
     description: blah blah

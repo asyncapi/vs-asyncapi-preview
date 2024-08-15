@@ -34,7 +34,7 @@ channels:
     description: Channel for order update
     subscribe:
       description: description for subscribe
-      operationId: operation1
+      operationId: receiveOrderCreated
       summary: Receive order update events
       message:
         messageId: trueMessage1
