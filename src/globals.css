@@ -379,3 +379,13 @@ a:hover {
   border-radius: 1px;
   transition: opacity 0.3s ease-in;
 }
+
+.highlight-node {
+  fill: #96dafb !important;
+  stroke: #0056b3 !important;
+}
+
+.highlight-edge {
+  stroke-width: 5px !important;
+}
+

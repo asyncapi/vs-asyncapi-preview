@@ -132,8 +132,8 @@ class SchemaHelper {
 
   static inferType(schema: {
     json: any;
-    isBooleanSchema?: (() => any) | (() => any) | undefined;
-    not?: (() => any) | (() => any) | undefined;
+    isBooleanSchema?: (() => any);
+    not?: (() => any) ;
     type?: any;
     const?: any;
     enum?: any;
@@ -256,7 +256,7 @@ class SchemaHelper {
     return constraints;
   }
 
-  static humanizeNumberRangeConstraint(min: undefined, exclusiveMin: undefined, max: undefined, exclusiveMax: undefined) {
+  static humanizeNumberRangeConstraint(min: any, exclusiveMin: any, max: any, exclusiveMax: any) {
     const hasExclusiveMin = exclusiveMin !== undefined;
     const hasMin = min !== undefined || hasExclusiveMin;
     const hasExclusiveMax = exclusiveMax !== undefined;
@@ -287,7 +287,7 @@ class SchemaHelper {
     if (!/^0\.0*1$/.test(strigifiedMultipleOf)) {
       return `multiple of ${strigifiedMultipleOf}`;
     }
-    return `decimal places <= ${strigifiedMultipleOf.split('.')[1].length}`;
+    return `decimal places <= ${strigifiedMultipleOf?.split('.')[1].length}`;
   }
 
   static humanizeRangeConstraint(description: any, min: number | undefined, max: undefined) {

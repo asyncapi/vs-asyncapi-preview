@@ -20,6 +20,7 @@
                      type = 'receive'; 
                      } 
                  } %>
+
                 <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` <b>Operation</b>`) %>
                 <% if(operation.summary()) { %>
                     <%- md.render(`*${operation.summary().trim()}*`) %> 
@@ -84,7 +85,7 @@
                     <ul><%= renderObject(operation.traits(), 0) %></ul>
                 </div>
             <% } %>
-
+            <hr/> 
             <% } %>
         <% } %>    
     <% } %>

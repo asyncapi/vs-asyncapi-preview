@@ -1,3 +1,4 @@
+<% let highlighter = []; %>
 <pre class="mermaid">
     flowchart TD
       <% if(servers?.length) { %>
@@ -30,5 +31,9 @@
       <% } %>  
         <% for( let relation of relations) {  %>
         <%= relation.replaceAll(/[\(\)\[\]\{\}]/g, "") %>
+        <% let [leftSideObject, rightSideObject] = relation.replaceAll(/[\(\)\[\]\{\}]/g, "").split(" --> "); %>
+        
         <% } %>
 </pre>
+
+  

@@ -11,45 +11,47 @@
     }%%
     
     classDiagram
+
+    <% if(!channels.length && !operations.length && !payloads.length && !others.length && !relations.length) { %>
+        AsyncAPI
+    <% } %>
+    
     <% for( let channel of channels){ %>
-        class <%= channel[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= channel[0] %>"]{
-            <% for( let prop of Object.entries(channel[1])){ %>
-                + <%= typeof prop[1] %> <%= prop[0] %>
+        class <%= replaceInvalidChars(`CHANNEL_${channel[0]}`) %>["<%= `${channel[0]}` %>"]{
+            <%= `<<CHANNEL>>` %>
+            <% for( let prop of Object.entries(channel[1])){ 
+                let parsedRef = String(prop[1]?.$ref).split('/');  
+                %>
+                + <%= (Array.isArray(parsedRef))? (parsedRef[parsedRef.length-1]) : typeof prop[1] %> <%= prop[0] %>
             <% } %>
         }
     <% } %>
     <% for( let operation of operations){ %>
-        class <%= operation[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= operation[0] %>"]{
-            <% for( let prop of Object.entries(operation[1])){ %>
-                + <%= typeof prop[1] %> <%= prop[0] %>
-            <% } %>
+        class <%= replaceInvalidChars(`OPERATION_${operation[0]}`) %>["<%= `${operation[0]}` %>"]{
+            <%= `<<OPERATION>>` %>
+            <% for( let prop of Object.entries(operation[1])){ 
+                if(String(prop[0]).toLowerCase() === 'action')  { %>
+                + <%= prop[0] %> <%= prop[1] %>
+            <% } } %>
         }
     <% } %>
-    <% for( let message of messages){ %>
-        class <%= message[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= message[0] %>"]{
-            <% for( let prop of Object.entries(message[1])){ %>
-                + <%= typeof prop[1] %> <%= prop[0] %>
-            <% } %>
-        }
-    <% } %>
+   
     <% for( let payload of payloads){ %>
-        class <%= payload[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= payload[0] %>"]{
+        class <%= replaceInvalidChars(payload[0]) %>["<%= payload[0] %>"]{
+            <%= `<<MESSAGE>>` %>
             <% Object.getOwnPropertyNames(payload[1]).map(prop=>{ %>
-                + <%= typeof payload[1][prop] %> <%= prop %>
+                + <%= payload[1][prop].type || typeof payload[1][prop] %> <%= prop %>
             <% }) %>
         }
     <% } %>
-    <% for( let header of headers){ %>
-        class <%= header[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= header[0] %>"]{
-            <% Object.getOwnPropertyNames(header[1]).map(prop=>{ %>
-                + <%= typeof header[1][prop] %> <%= prop %>
-            <% }) %>
-        }
-    <% } %>
-    <% for( let other of others){ %>
-        class <%= other[0].replaceAll(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_") %>["<%= other[0] %>"]{
+  
+    <% for( let other of others){ 
+        let elements = other[0].split('.');
+        %>
+        class <%= replaceInvalidChars(other[0]) %>["<%= elements[elements.length-1] %>"]{
+            <%= `<<SCHEMA>>` %>
             <% Object.getOwnPropertyNames(other[1]).map(prop=>{ %>
-                + <%= typeof other[1][prop] %> <%= prop %>
+                + <%= other[1][prop].type || typeof other[1][prop] %> <%= prop %>
             <% }) %>
         }
     <% } %>
@@ -57,3 +59,5 @@
         <%= relation %>
         <% } %>
 </pre>
+
+<% function replaceInvalidChars(str) { return str.replaceAll(/[`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,"_")} %>
