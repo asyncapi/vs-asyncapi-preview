@@ -3,9 +3,7 @@ import addField from './functions/addField';
 import deleteEndingSlash from './functions/deleteEndingSlash';
 import latestVersionUpdate from './functions/latestVersionUpdate';
 import deleteEmptyParam from './functions/deleteEmptyParam';
-import createNewParam from './functions/createNewParam';
 import deleteID from './functions/deleteID';
-import createNewID from './functions/createNewID';
 import deleteRepeatedTags from './functions/deleteRepeatedTags';
 import renameRepeatedTag from './functions/renameRepeatedTag';
 import addDescription from './functions/addDescription';
@@ -123,13 +121,6 @@ export default {
                     given: '$.channels.',
                     field: '',
                     function: deleteEmptyParam
-                },
-                {
-                    name: 'Quick fix - create new param',
-                    given: '$.chennels',
-                    field: 'channels',
-                    function: createNewParam
-
                 }
             ]
         },
@@ -143,26 +134,8 @@ export default {
                     given: '$.channels.',
                     field: 'messsageId',
                     function: deleteID
-                },
-                {
-                    name: 'Quick fix - create new messageId',
-                    given: '$..messageId',
-                    field: 'messageId',
-                    function: createNewID
                 }
             ]
-        },
-        "asyncapi-operation-operationId": {
-            description: 'Operation must have "operationId".',
-            recommended: true,
-            given: '$',
-            fix: {
-                name: 'Quick fix - create an operationId',
-                given: '$.channels[*][publish,subscribe]',
-                field: 'operationId',
-                function: createNewID
-
-            }
         },
         "asyncapi-operation-operationId-uniqueness": {
             description: '"operationId" must be unique across all the operations.',
@@ -174,12 +147,6 @@ export default {
                     given: '$.channels[*][publish,subscribe]',
                     field: 'operationId',
                     function: deleteID
-                },
-                {
-                    name: 'Quick fix - create new operationId',
-                    given: '$.channels[*][publish,subscribe]',
-                    field: 'operationId',
-                    function: createNewID
                 }
             ]
         },
