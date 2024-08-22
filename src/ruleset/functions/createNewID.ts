@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'js-yaml';
 import { JSONPath } from 'jsonpath-plus';
-import { count } from 'console';
 
 function getMessageIDMap(documentContent: string, given: string, field: string) {
     const IDMap = new Set<string>();

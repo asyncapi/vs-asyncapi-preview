@@ -1,7 +1,4 @@
 import * as vscode from 'vscode';
-import * as yaml from 'js-yaml';
-import { JSONPath } from 'jsonpath-plus';
-import { off } from 'process';
 
 const emptyCurlyBracesPattern = /\{\}/g;
 const extraDotsPattern = /\.\./g;

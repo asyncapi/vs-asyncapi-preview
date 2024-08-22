@@ -1,5 +1,4 @@
 export default {
-    // Contains good examples
     tags: [
         {
             name: "tag1",
