@@ -241,7 +241,6 @@ export default async function classDiagram(asyncapi: any, context: vscode.Extens
       }
     }
   );
-  console.log(data);
   return await ejs.renderFile(templatePath, {
     ...data,
   });
