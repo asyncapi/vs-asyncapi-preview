@@ -104,7 +104,7 @@
     "testfixers": "mocha -r ts-mocha -r ts-node/register --require ./__mocks__/vscode.ts src/ruleset/functions/test/*.test.ts"
   },
   "devDependencies": {
-    "@asyncapi/react-component": "^1.2.7",
+    "@asyncapi/react-component": "^2.0.0",
     "@types/chai": "^4.3.16",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
