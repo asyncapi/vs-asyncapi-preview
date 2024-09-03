@@ -333,7 +333,6 @@ function tree(path = '') {
 }
 
 function buildPath(path = '', field = '') {
-  console.log(path,field);
   if (!path) return field;
   return `${path}.${field}`;
 }

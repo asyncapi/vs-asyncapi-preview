@@ -65,8 +65,19 @@ const extensionConfig = {
           to: 'node_modules/mermaid/dist/mermaid.min.js',
         },
         {
+          from: 'node_modules/panzoom/dist/panzoom.min.js',
+          to: 'node_modules/panzoom/dist/panzoom.min.js',
+        },{
+          from: 'node_modules/turndown/dist/turndown.js',
+          to: 'node_modules/turndown/dist/turndown.js',
+        },
+        {
           from: 'src/components',
           to: 'components'
+        },
+        {
+          from: 'src/globals.css',
+          to: 'globals.css'
         } 
 
       ],
