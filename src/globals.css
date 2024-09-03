@@ -389,3 +389,105 @@ a:hover {
   stroke-width: 5px !important;
 }
 
+#index {
+  width: 0px;
+  padding: 0px;
+  background-color: #bbbbbb;
+  position: fixed;
+  height: 100%;
+  overflow-y: auto;
+  transition: width 0.4s, padding 0.4s;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.index-part {
+  width: 40vw;
+  overflow: hidden;
+}
+
+.index-part-title{
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+#index ul {
+list-style-type: none;
+padding-left: 15px;
+}
+#index li {
+  white-space: nowrap;
+  padding-bottom: 5px;
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+
+.arrow {
+  display: inline-block;
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+  font-family: cursive;
+  text-decoration: none;
+}
+
+.index-part-content{
+  display: none;
+  padding-left: 20px;
+}
+
+h4, h5 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+#index a{
+  text-decoration: none;
+  color: #333;
+  padding-right: 5px;
+}
+
+#index a:active {
+  border: 0px;
+  outline: 0px;
+}
+
+#index a:hover {
+  text-decoration: underline;
+}
+
+.expand-contract-btn {
+display: flex;
+flex-direction: row;
+justify-content: center;
+border: 0.5px solid #c9c8c8;
+border-radius: 100%;
+position: absolute;
+top: 50%;
+left: -35px;
+z-index: 2;
+width: 60px;
+height: 60px;
+background: #ddd;
+transition: left 0.4s;
+}
+
+.contract-btn, .expand-btn {
+  position: relative;
+  top: 50%;
+  transform: translateY(-30px);
+  font-size: 40px;
+  font-weight: bolder;
+  font-family: cursive;
+  cursor: pointer;
+}
+
+.contract-btn {
+  border-right: 0.1px solid #8d8c8c;
+}
+.expand-btn {
+  border-left: 0.1px solid #8d8c8c;
+}

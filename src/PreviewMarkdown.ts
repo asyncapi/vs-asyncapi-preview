@@ -192,7 +192,15 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <link rel="stylesheet" href="${globalsCSS}"/>
     </head>
     <body x-timestamp="${Date.now()}">
-
+      <div class="expand-contract-btn">
+          <div class="contract-btn">&lt;</div>
+          <div class="expand-btn">&gt;</div>
+      </div>
+      <div id="index">
+       <h2> Index </h2>
+         <a href="#index-info">Info</a>
+         <p class="index-part-title">Operations</p>
+      </div>
       <div class="container">
         <div class="section" id="section1">${result}</div>
         <div class="section" id="section2">${flowchart}</div>
@@ -362,7 +370,91 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
                   const { x, y } = panZoomClassDiagramInstance.getTransform()
                   panZoomClassDiagramInstance.smoothMoveTo(x+50, y);
                 }
-              });            
+              });
+              
+              function toggleSection(event) {
+                const title = event.currentTarget;
+                const content = title.nextElementSibling;
+                const arrow = title.querySelector('.arrow');
+
+                title.style.outline = '0px';
+                title.style.border = '0px';
+                
+                if (content?.style?.display === 'none') {
+                    content.style.display = 'block';
+                    arrow.style.transform = 'rotate(90deg)';
+                } else {
+                    content.style.display = 'none';
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+              }
+              
+              const expandContractBtn = document.querySelector('.expand-contract-btn');
+              const expandBtn = document.querySelector('.expand-btn');
+              const contractBtn = document.querySelector('.contract-btn');
+              const index = document.querySelector('#index');
+              
+              expandBtn.addEventListener('click',()=>{
+                index.style.width = '20%' ;
+                index.style.padding = '10px'
+                expandContractBtn.style.left = "calc(20% - 10px)"; 
+              })
+              
+              contractBtn.addEventListener('click',()=>{
+                index.style.width = '0%' ;
+                index.style.padding = '0px'
+                expandContractBtn.style.left = "-35px";
+              })
+              
+              const indexSections = document.querySelectorAll('.index-section');
+              let channelList = [];
+              let msgList = [];
+              let newSection = '<div>';
+              indexSections.forEach((part)=> {
+
+                const channel = part.querySelectorAll('p');
+                const operationId = part.querySelectorAll('li');
+                const h4Elements = part.querySelectorAll('h4');
+                const h5Elements = part.querySelectorAll('h5');
+
+                channel[0].id = 'id_' + parseInt(Math.random() * 1000 * (channel[0].textContent.length ?? 3));
+                operationId[0].id = 'id_' + parseInt(Math.random() * 1000 * (operationId[0].textContent.length ?? 3));
+
+                newSection += '<div class="index-part"> <a href="#'+operationId[0].id+'" class="index-part-title">  <span class="arrow">&gt;</span> '+operationId[0].textContent?.replaceAll("Operation ID:","")+'</a> <div class="index-part-content" style="display: none;"> <ul>';
+                newSection += '<li><a href="#'+channel[0].id+'">Channel</a></li> ';
+                channelList.push('<li><a href="#'+channel[0].id+'">'+channel[0].textContent+'</a></li> ');
+                h4Elements.forEach((h4)=> {
+                  h4.id = parseInt(Math.random() * 10000 * (h4.textContent.length ?? 4));
+                  newSection += '<li><a href="#'+h4.id+'">'+h4.textContent+'</a></li> ';
+                  if(h4.textContent.indexOf('Message') >= 0){
+                    msgList.push('<li><a href="#'+h4.id+'">'+h4.textContent+'</a></li> ')
+                  }
+                })
+                h5Elements.forEach((h5)=> {
+                  h5.id = parseInt(Math.random()* 100000 * (h5.textContent.length ?? 5));
+                  newSection += '<li><a href="#'+h5.id+'">'+h5.textContent+'</a></li> ';
+                })
+
+                newSection += '</ul></div></div> ';
+              });
+              
+               newSection += '</div><p class="index-part-title"> Channels </p> <ul>';
+                channelList.forEach(element => {
+                  newSection += element;
+                });
+                newSection += '</ul><p class="index-part-title"> Messages </p> <ul>';
+                msgList.forEach(element => {
+                  newSection += element;
+                });
+                newSection += '</ul>';
+                index.innerHTML += newSection;
+                
+                // Add event listeners to all section and list item titles
+              const sectionTitles = document.querySelectorAll('.index-part-title');
+              sectionTitles.forEach(title => {
+              console.log(title);
+                  title.addEventListener('click', toggleSection);
+              });
           });
 
           document.getElementById('copy-button').addEventListener('click', function() {
@@ -447,6 +539,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             edge.addEventListener('mouseleave', removeHighlights);
           });
         }
+
       </script>
   
     </body>

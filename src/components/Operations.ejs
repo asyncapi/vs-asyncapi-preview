@@ -6,7 +6,6 @@
                 <% let type; 
                    const applyToAllServers = allServersLength === channel.servers().all().length;
                    const servers = applyToAllServers ? [] : channel.servers().all(); 
-                   const showInfoList = operation.operationId() || (servers && servers.length);
                  if (operation.isSend()) { 
                      if (operation.reply()) { 
                      type = 'request'; 
@@ -20,72 +19,69 @@
                      type = 'receive'; 
                      } 
                  } %>
-
-                <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` <b>Operation</b>`) %>
-                <% if(operation.summary()) { %>
-                    <%- md.render(`*${operation.summary().trim()}*`) %> 
-                <% } %>
-                <% if(showInfoList) { %>
-                    <ul>
-                        <% if(operation.operationId()) { %>
-                            <li><b>Operation ID:</b> <%= operation.operationId() %></li>
-                            <% if(servers && servers.length) { %>
-                                <li>Available Only on Server:
-                                     <%= servers.map(s => {
-                                        const serverId = s.id();
-                                        const slug = FormatHelpers.slugify(serverId);
-                                        return `[${serverId}](#${slug}-server)`;
-                                        }).join(', ') %>
-                                </li>
-                            <% } %>
+                <div class="index-section">
+                    <%-  md.render(`${getRenderedTypeForOperation({type})} \`${channel.address()}\` <b>Operation</b>`) %>
+                    <% if(operation.summary()) { %>
+                        <%- md.render(`*${operation.summary().trim()}*`) %> 
+                    <% } %>
+                        <ul>
+                                <li><b>Operation ID:</b> <%= operation.operationId() ?? 'Operation_ID_not_available' %></li>
+                                <% if(servers && servers.length) { %>
+                                    <li>Available Only on Server:
+                                         <%= servers.map(s => {
+                                            const serverId = s.id();
+                                            const slug = FormatHelpers.slugify(serverId);
+                                            return `[${serverId}](#${slug}-server)`;
+                                            }).join(', ') %>
+                                    </li>
+                                <% } %>
+                        </ul>
+                    <% if(channel.hasDescription()) { %>
+                        <%- md.render(channel.description()) %>
+                    <% } %>
+                    <% if(operation.hasDescription()) { %>
+                        <%- md.render(operation.description()) %>
+                    <% } %>
+                    <% if(operation.externalDocs()?.hasDescription() ) { %>
+                          <a href="<%= operation.externalDocs().url() %>"><%= (operation.externalDocs().description() || 'Find more info here.') %></a>
+                    <% } %>
+    
+                    <%- include(tagsPath,{ name:"Operation tags", tags: operation.tags() }) %>
+    
+                    <% const parameters = schemaHelper.parametersToSchema(channel.parameters().all()); %>
+                    <% if(parameters) { %>
+                        <h4>Parameters</h4>
+                        <%- include(schemaPath,{ schema: parameters, schemaName: "Parameters", hideTitle: true, schemaHelper, md, path:"" }) %>
+                    <% } %>
+    
+                    <%- include(securityPath,{ header:'Additional security requirements', protocol: null, security: operation.security(), serverHelper, md }) %>
+    
+    
+                    <%- include(bindingsPath,{ name:"Channel specific information", bindings: channel.bindings(), schemaHelper, schemaPath, md }) %>
+                    <%- include(bindingsPath,{ name:"Operation specific information", bindings: operation.bindings(), schemaHelper, schemaPath, md  }) %>
+                    <%- include(extensionsPath,{ name:"Channel extensions", extensions: channel.extensions(), schemaHelper, schemaPath, md  }) %>
+                    <%- include(extensionsPath,{ name:"Operation extensions", extensions: operation.extensions(), schemaHelper, schemaPath, md  }) %>
+    
+    
+                    <% const messages = operation.messages().all(); %>
+                    <% if (messages.length !== 0) { %>
+                        <% const messageText = getOperationMessageText({type}); %>
+                        <% if(messages.length > 1) { %>
+                            <p><%- md.render(messageText) %></p>
                         <% } %>
-                    </ul>
-                <% } %>
-                <% if(channel.hasDescription()) { %>
-                    <%- md.render(channel.description()) %>
-                <% } %>
-                <% if(operation.hasDescription()) { %>
-                    <%- md.render(operation.description()) %>
-                <% } %>
-                <% if(operation.externalDocs()?.hasDescription() ) { %>
-                      <a href="<%= operation.externalDocs().url() %>"><%= (operation.externalDocs().description() || 'Find more info here.') %></a>
-                <% } %>
-
-                <%- include(tagsPath,{ name:"Operation tags", tags: operation.tags() }) %>
-
-                <% const parameters = schemaHelper.parametersToSchema(channel.parameters().all()); %>
-                <% if(parameters) { %>
-                    <h4>Parameters</h4>
-                    <%- include(schemaPath,{ schema: parameters, schemaName: "Parameters", hideTitle: true, schemaHelper, md, path:"" }) %>
-                <% } %>
-
-                <%- include(securityPath,{ header:'Additional security requirements', protocol: null, security: operation.security(), serverHelper, md }) %>
-
-
-                <%- include(bindingsPath,{ name:"Channel specific information", bindings: channel.bindings(), schemaHelper, schemaPath, md }) %>
-                <%- include(bindingsPath,{ name:"Operation specific information", bindings: operation.bindings(), schemaHelper, schemaPath, md  }) %>
-                <%- include(extensionsPath,{ name:"Channel extensions", extensions: channel.extensions(), schemaHelper, schemaPath, md  }) %>
-                <%- include(extensionsPath,{ name:"Operation extensions", extensions: operation.extensions(), schemaHelper, schemaPath, md  }) %>
-
-
-                <% const messages = operation.messages().all(); %>
-                <% if (messages.length !== 0) { %>
-                    <% const messageText = getOperationMessageText({type}); %>
-                    <% if(messages.length > 1) { %>
-                        <p><%- md.render(messageText) %></p>
+                        <% for(let message of messages) { %>
+                            <%- include(messagePath,{message, bindingsPath, extensionsPath, schemaHelper, schemaPath, md, messageHelper}) %>
+                        <% } %>
                     <% } %>
-                    <% for(let message of messages) { %>
-                        <%- include(messagePath,{message, bindingsPath, extensionsPath, schemaHelper, schemaPath, md, messageHelper}) %>
-                    <% } %>
+    
+                    <% if(operation.traits().incorrect  && Object.values(operation.traits() || []).length > 1) { %>
+                    <div>
+                        <h5>Operation Traits</h5>
+                        <ul><%= renderObject(operation.traits(), 0) %></ul>
+                    </div>
                 <% } %>
-
-                <% if(operation.traits().incorrect  && Object.values(operation.traits() || []).length > 1) { %>
-                <div>
-                    <h5>Operation Traits</h5>
-                    <ul><%= renderObject(operation.traits(), 0) %></ul>
-                </div>
-            <% } %>
-            <hr/> 
+                </div> 
+                <hr/> 
             <% } %>
         <% } %>    
     <% } %>
