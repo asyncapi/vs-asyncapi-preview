@@ -134,7 +134,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         AsyncApiStandalone.render({
           schema: {
             url: '${asyncapiWebviewUri}',
-            options: { method: "GET", mode: "cors" },
+            requestOptions: { method: "GET", mode: "cors" },
           },
           config: {
             show: {
