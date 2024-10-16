@@ -103,7 +103,7 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/browser/standalone/index.js')
   );
   const edavisualiserCss = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/styles/default.css')
+    vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/styles/default.min.css')
   );
   const props = await visualize(asyncapiFile.fsPath);
   const html = `
