@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
-import { visualizeAsyncApi, openVisualizerFiles } from './Visualizer';
+import { visualizeAsyncApi } from './Visualizer';
 
 
 export function activate(context: vscode.ExtensionContext) {
