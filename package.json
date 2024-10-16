@@ -49,6 +49,14 @@
       {
         "command": "asyncapi.paste",
         "title": "AsyncAPI: Paste as Schema"
+      },
+      {
+        "command": "asyncapi.visualize",
+        "title": "visualize AsyncAPI document",
+        "icon": {
+          "light": "resources/icons/open-preview_black.svg",
+          "dark": "resources/icons/open-preview_white.svg"
+        }
       }
     ],
     "snippets": [
@@ -67,11 +75,19 @@
         {
           "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview"
+        },
+        {
+          "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
+          "command": "asyncapi.visualize",
+          "group": "navigation"
         }
       ],
       "commandPalette": [
         {
           "command": "asyncapi.preview"
+        },
+        {
+          "command": "asyncapi.visualize"
         }
       ],
       "editor/context": [
@@ -103,6 +119,8 @@
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION"
   },
   "devDependencies": {
+    "@asyncapi/edavisualiser": "^1.2.0",
+    "@asyncapi/parser": "^3.3.0",
     "@asyncapi/react-component": "^2.0.0",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",

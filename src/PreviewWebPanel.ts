@@ -81,7 +81,7 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
   openAsyncapiFiles[uri.fsPath] = panel;
 }
 
-async function promptForAsyncapiFile() {
+export async function promptForAsyncapiFile() {
   if (isAsyncAPIFile(vscode.window.activeTextEditor?.document)) {
     return vscode.window.activeTextEditor?.document.uri;
   }
