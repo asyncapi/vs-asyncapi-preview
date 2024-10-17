@@ -3,6 +3,7 @@ import * as path from 'path';
 import { Parser, fromFile } from '@asyncapi/parser';
 import { promptForAsyncapiFile } from './PreviewWebPanel';
 export const openVisualizerFiles: { [id: string]: vscode.WebviewPanel } = {};
+
 export function visualizeAsyncApi(context: vscode.ExtensionContext) {
   return async (uri: vscode.Uri) => {
     uri = uri || (await promptForAsyncapiFile()) as vscode.Uri;
@@ -50,7 +51,19 @@ async function openVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri)
 async function visualize(filePath: string): Promise<any> {
   const parser = new Parser();
   try {
-    const { document } = await fromFile(parser, filePath).parse();
+    const { document, diagnostics } = await fromFile(parser, filePath).parse();
+    const errors = diagnostics.filter(d => d.severity === 0);
+    console.log("errors", errors);  
+    console.log("diagnostics", diagnostics);
+    if (errors.length > 0) {
+      return {
+        errors: errors.map(error => ({
+          message: error.message,
+          path: error.path.join('.'),
+          range: error.range
+        }))
+      };
+    }
     if (document) {
       const props = {
         application: {
@@ -95,7 +108,7 @@ async function visualize(filePath: string): Promise<any> {
       return props;
     }
   } catch (error:any) {
-    return `console.error("Error parsing AsyncAPI document:", ${error.message});`;
+    return { errors: [{ message: `Error parsing AsyncAPI document: ${error.message}` }] };
   }
 }
 async function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri): Promise<string> {
@@ -105,7 +118,34 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
   const edavisualiserCss = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/styles/default.min.css')
   );
-  const props = await visualize(asyncapiFile.fsPath);
+  const result = await visualize(asyncapiFile.fsPath);
+  let content;
+  if ('errors' in result) {
+    content = `
+      <div id="error-overlay">
+        <div id="error-card">
+          <h2 style="margin-top: 0;">Validation Errors:</h2>
+          <ul style="padding-left: 20px;">
+            ${result.errors.map((error: any) => `
+              <li style="margin-bottom: 10px;">
+                <strong>${error.path || 'Document'}:</strong> ${error.message}
+                ${error.range ? `<br>Line: ${error.range.start.line}, Column: ${error.range.start.character}` : ''}
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  } else {
+    content = `
+      <div id="visualizer"></div>
+      <script>
+        const vscode = acquireVsCodeApi();
+        const props = ${JSON.stringify(result)};
+        EDAVisualiserStandalone.renderApplicationView(props, document.getElementById('visualizer'));
+      </script>
+    `;
+  }
   const html = `
   <!DOCTYPE html>
   <html>
@@ -123,11 +163,26 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
           width: 100%;
           height: 100%;
         }
-        .react-flow__renderer {
-          background-color: #f0f0f0; 
+          #error-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
         }
-        .react-flow__node {
-          background-color: #ffffff;
+        #error-card {
+          background-color: #FFD2D2;
+          color: #D8000C;
+          padding: 20px;
+          border-radius: 5px;
+          max-width: 80%;
+          max-height: 80%;
+          overflow-y: auto;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
       </style>
     </head>
@@ -135,12 +190,7 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
       <div id="visualizer"></div>
   
       <script src="${edavisualiserJs}"></script>
-      <script>
-        const vscode = acquireVsCodeApi();
-        const props = ${JSON.stringify(props)};
-        
-        EDAVisualiserStandalone.renderApplicationView(props, document.getElementById('visualizer'));
-      </script>
+      ${content}
     </body>
   </html>
   `;
