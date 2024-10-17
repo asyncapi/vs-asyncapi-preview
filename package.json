@@ -33,7 +33,8 @@
     "onLanguage:yml",
     "onLanguage:yaml",
     "onLanguage:json",
-    "onCommand:asyncapi.preview"
+    "onCommand:asyncapi.preview",
+    "onCommand:asyncapi.visualize"
   ],
   "main": "./dist/extension.js",
   "contributes": {
