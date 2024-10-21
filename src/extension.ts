@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
-
+import { visualizeAsyncApi } from './VisualizeWebPanel';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "asyncapi-preview" is now active!');
@@ -37,6 +37,8 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('asyncapi.preview', previewAsyncAPI(context)));
 
   context.subscriptions.push(vscode.commands.registerCommand("asyncapi.paste", asyncapiSmartPaste));
+
+  context.subscriptions.push(vscode.commands.registerCommand("asyncapi.visualize", visualizeAsyncApi(context)));
 }
 
 export function deactivate() {}
