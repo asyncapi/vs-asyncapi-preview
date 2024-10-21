@@ -2,7 +2,7 @@ import { Parser, fromFile } from '@asyncapi/parser';
 import * as path from 'path';
 
 import * as vscode from 'vscode';
-import { openAsyncapiFiles, promptForAsyncapiFile } from './PreviewWebPanel';
+import { promptForAsyncapiFile } from './PreviewWebPanel';
 
 type Operation = {
   channel: string;
@@ -12,12 +12,14 @@ type Operation = {
   forApplication: string;
 };
 
+export const openVisualizerFiles: { [id: string]: vscode.WebviewPanel } = {}; // vscode.Uri.fsPath => vscode.WebviewPanel
+
 export function visualizeAsyncApi(context: vscode.ExtensionContext) {
   return async (uri: vscode.Uri) => {
     uri = uri || ((await promptForAsyncapiFile()) as vscode.Uri);
     if (uri) {
       console.log('Opening asyncapi file', uri.fsPath);
-      openVisualizerAsyncApi(context, uri);
+      await openVisualizerAsyncApi(context, uri);
     }
   };
 }
@@ -34,7 +36,7 @@ export async function openVisualizerAsyncApi(context: vscode.ExtensionContext, u
     });
   }
   const panel: vscode.WebviewPanel =
-    openAsyncapiFiles[uri.fsPath] ||
+    openVisualizerFiles[uri.fsPath] ||
     vscode.window.createWebviewPanel('asyncapi-visualizer', `EDAVisualizer: ${path.basename(uri.fsPath)}`, vscode.ViewColumn.Two, {
       localResourceRoots: [vscode.Uri.file(path.dirname(uri.fsPath)), vscode.Uri.joinPath(context.extensionUri, 'dist')],
       enableScripts: true,
@@ -45,9 +47,9 @@ export async function openVisualizerAsyncApi(context: vscode.ExtensionContext, u
   panel.webview.html = await getWebviewContent(context, panel.webview, uri);
 
   panel.onDidDispose(() => {
-    delete openAsyncapiFiles[uri.fsPath];
+    delete openVisualizerFiles[uri.fsPath];
   });
-  openAsyncapiFiles[uri.fsPath] = panel;
+  openVisualizerFiles[uri.fsPath] = panel;
 }
 
 async function visualize(filePath: string) {
@@ -100,9 +102,9 @@ async function visualize(filePath: string) {
       };
 
       if (element.action() === 'receive' || element.action() === 'subscribe') {
-      props.incomingOperations.push(operation as Operation);
+        props.incomingOperations.push(operation as Operation);
       } else if (element.action() === 'send' || element.action() === 'publish') {
-      props.outgoingOperations.push(operation as Operation);
+        props.outgoingOperations.push(operation as Operation);
       }
     });
     return JSON.stringify(props);
@@ -111,7 +113,7 @@ async function visualize(filePath: string) {
 
 async function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri) {
   const result = await visualize(asyncapiFile.fsPath);
-  console.log(result);
+
   const visualizerJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/browser/standalone/index.js')
   );
