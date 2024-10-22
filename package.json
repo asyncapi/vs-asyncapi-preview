@@ -41,7 +41,7 @@
     "commands": [
       {
         "command": "asyncapi.preview",
-        "title": "Preview AsyncAPI",
+        "title": "AsyncAPI: Preview",
         "icon": {
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
@@ -53,7 +53,7 @@
       },
       {
         "command": "asyncapi.visualize",
-        "title": "visualize AsyncAPI document",
+        "title": "AsyncAPI: Visualize document",
         "icon": {
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
