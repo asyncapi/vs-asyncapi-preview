@@ -56,6 +56,14 @@ const extensionConfig = {
           from: 'node_modules/@asyncapi/react-component/styles/default.min.css',
           to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
         },
+        {
+          from: 'node_modules/@asyncapi/edavisualiser/browser/standalone/index.js',
+          to: 'node_modules/@asyncapi/edavisualiser/browser/standalone/index.js',
+        },
+        {
+          from: 'node_modules/@asyncapi/edavisualiser/styles/default.min.css',
+          to: 'node_modules/@asyncapi/edavisualiser/styles/default.min.css',
+        },
       ],
     }),
   ],
