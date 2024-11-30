@@ -53,11 +53,7 @@
       },
       {
         "command": "asyncapi.visualize",
-        "title": "AsyncAPI: Visualize document",
-        "icon": {
-          "light": "resources/icons/open-preview_black.svg",
-          "dark": "resources/icons/open-preview_white.svg"
-        }
+        "title": "AsyncAPI: Visualize document"
       }
     ],
     "snippets": [
@@ -79,8 +75,7 @@
         },
         {
           "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
-          "command": "asyncapi.visualize",
-          "group": "navigation"
+          "command": "asyncapi.visualize"
         }
       ],
       "commandPalette": [
