@@ -53,7 +53,7 @@
       },
       {
         "command": "asyncapi.visualize",
-        "title": "AsyncAPI: Visualize document"
+        "title": "AsyncAPI: EDA Visualizer"
       }
     ],
     "snippets": [
