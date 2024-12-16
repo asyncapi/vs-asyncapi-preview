@@ -2,7 +2,7 @@
   "name": "asyncapi-preview",
   "displayName": "asyncapi-preview",
   "description": "Preview AsyncAPI documents inside VSCode.",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "icon": "asyncapi-logo.png",
   "galleryBanner": {
     "color": "#4a4a4a",
@@ -117,7 +117,7 @@
   "devDependencies": {
     "@asyncapi/edavisualiser": "^1.2.0",
     "@asyncapi/parser": "^3.3.0",
-    "@asyncapi/react-component": "^2.0.0",
+    "@asyncapi/react-component": "^2.3.2",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
