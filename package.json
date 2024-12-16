@@ -33,14 +33,15 @@
     "onLanguage:yml",
     "onLanguage:yaml",
     "onLanguage:json",
-    "onCommand:asyncapi.preview"
+    "onCommand:asyncapi.preview",
+    "onCommand:asyncapi.visualize"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "asyncapi.preview",
-        "title": "Preview AsyncAPI",
+        "title": "AsyncAPI: Preview",
         "icon": {
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
@@ -49,6 +50,10 @@
       {
         "command": "asyncapi.paste",
         "title": "AsyncAPI: Paste as Schema"
+      },
+      {
+        "command": "asyncapi.visualize",
+        "title": "AsyncAPI: EDA Visualizer"
       }
     ],
     "snippets": [
@@ -67,11 +72,18 @@
         {
           "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
           "command": "asyncapi.preview"
+        },
+        {
+          "when": "(resourceLangId == json || resourceLangId == yaml) && asyncapi.isAsyncAPI",
+          "command": "asyncapi.visualize"
         }
       ],
       "commandPalette": [
         {
           "command": "asyncapi.preview"
+        },
+        {
+          "command": "asyncapi.visualize"
         }
       ],
       "editor/context": [
@@ -103,6 +115,8 @@
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION"
   },
   "devDependencies": {
+    "@asyncapi/edavisualiser": "^1.2.0",
+    "@asyncapi/parser": "^3.3.0",
     "@asyncapi/react-component": "^2.3.2",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
