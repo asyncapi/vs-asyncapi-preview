@@ -107,7 +107,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
   const asyncapiContent = fs.readFileSync(asyncapiFile.fsPath, 'utf-8');
-  
+
   const html = `
   <!DOCTYPE html>
   <html>
@@ -134,9 +134,11 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <script src="${asyncapiComponentJs}"></script>
       <script>
         const vscode = acquireVsCodeApi();
-        const schema = ${JSON.stringify(asyncapiContent)};
         AsyncApiStandalone.render({
-          schema: schema,
+          schema:  {
+            url: '${asyncapiWebviewUri}',
+            options: { method: "GET", mode: "cors" },
+          },
           config: {
             show: {
               sidebar: true,
