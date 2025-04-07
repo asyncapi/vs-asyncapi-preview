@@ -2,17 +2,23 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { Parser, fromFile } from '@asyncapi/parser';
 import { promptForAsyncapiFile } from './PreviewWebPanel';
+import { Logger } from './utils/Logger';
+
+// Initialize logger
+const logger = new Logger('asyncapi-visualizer');
+
 export const openVisualizerFiles: { [id: string]: vscode.WebviewPanel } = {};
 
 export function visualizeAsyncApi(context: vscode.ExtensionContext) {
   return async (uri: vscode.Uri) => {
     uri = uri || (await promptForAsyncapiFile()) as vscode.Uri;
     if (uri) {
-      console.log('Visualizing asyncapi file', uri.fsPath);
+      logger.info(`Visualizing AsyncAPI file: ${uri.fsPath}`);
       await openVisualizer(context, uri);
     }
   };
 }
+
 async function openVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri) {
   const localResourceRoots = [
     vscode.Uri.file(path.dirname(uri.fsPath)),
@@ -24,6 +30,8 @@ async function openVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri)
       localResourceRoots.push(folder.uri);
     });
   }
+  
+  logger.debug(`Creating webview panel for: ${uri.fsPath}`);
   const panel = vscode.window.createWebviewPanel(
     'asyncapi-visualizer',
     `Visualizer: ${path.basename(uri.fsPath)}`,
@@ -37,25 +45,37 @@ async function openVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri)
     }
   );
     
-    panel.title = path.basename(uri.fsPath);
+  panel.title = path.basename(uri.fsPath);
   try {
+    logger.debug(`Generating webview content for: ${uri.fsPath}`);
     panel.webview.html = await getWebviewContent(context, panel.webview, uri);
   } catch (error: any) {
-    vscode.window.showErrorMessage(`Failed to visualize AsyncAPI: ${error.message}`);
+    const errorMessage = `Failed to visualize AsyncAPI: ${error.message}`;
+    logger.error(errorMessage);
+    logger.error(`Stack trace: ${error.stack}`);
+    vscode.window.showErrorMessage(errorMessage);
   }
+  
   panel.onDidDispose(() => {
+    logger.debug(`Visualizer panel disposed for: ${uri.fsPath}`);
     delete openVisualizerFiles[uri.fsPath];
   });
   openVisualizerFiles[uri.fsPath] = panel;
 }
+
 async function visualize(filePath: string): Promise<any> {
+  logger.debug(`Parsing AsyncAPI file: ${filePath}`);
   const parser = new Parser();
   try {
     const { document, diagnostics } = await fromFile(parser, filePath).parse();
     const errors = diagnostics.filter(d => d.severity === 0);
-    console.log("errors", errors);  
-    console.log("diagnostics", diagnostics);
+    
     if (errors.length > 0) {
+      logger.warn(`Found ${errors.length} validation errors in ${filePath}`);
+      errors.forEach(error => {
+        logger.warn(`Validation error: ${error.message} at ${error.path.join('.')}`);
+      });
+      
       return {
         errors: errors.map(error => ({
           message: error.message,
@@ -64,7 +84,9 @@ async function visualize(filePath: string): Promise<any> {
         }))
       };
     }
+    
     if (document) {
+      logger.debug(`Successfully parsed AsyncAPI document: ${filePath}`);
       const props = {
         application: {
           id: document.info().title() || "Application",
@@ -88,6 +110,7 @@ async function visualize(filePath: string): Promise<any> {
         outgoingOperations: [] as any,
       };
       
+      logger.debug(`Processing ${document.operations().length()} operations`);
       for (const operation of document.operations()) {
         const operationObject = {
           channel: operation.channels().all()[0].address(),
@@ -108,9 +131,12 @@ async function visualize(filePath: string): Promise<any> {
       return props;
     }
   } catch (error:any) {
+    logger.error(`Error parsing AsyncAPI document: ${error.message}`);
+    logger.error(`Stack trace: ${error.stack}`);
     return { errors: [{ message: `Error parsing AsyncAPI document: ${error.message}` }] };
   }
 }
+
 async function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview, asyncapiFile: vscode.Uri): Promise<string> {
   const edavisualiserJs = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/browser/standalone/index.js')
@@ -118,9 +144,13 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
   const edavisualiserCss = webview.asWebviewUri(
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/edavisualiser/styles/default.min.css')
   );
+  
+  logger.debug(`Visualizing file: ${asyncapiFile.fsPath}`);
   const result = await visualize(asyncapiFile.fsPath);
   let content;
+  
   if ('errors' in result) {
+    logger.warn(`Rendering error view for ${asyncapiFile.fsPath}`);
     content = `
       <div id="error-overlay">
         <div id="error-card">
@@ -137,6 +167,7 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
       </div>
     `;
   } else {
+    logger.debug(`Rendering visualization view for ${asyncapiFile.fsPath}`);
     content = `
       <div id="visualizer"></div>
       <script>
@@ -146,6 +177,7 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
       </script>
     `;
   }
+  
   const html = `
   <!DOCTYPE html>
   <html>

@@ -1,0 +1,51 @@
+asyncapi: 2.6.0
+info:
+  title: Streetlights API
+  version: '1.0.0'
+  description: |
+    The Streetlights API allows you to remotely manage the city lights.
+  contact:
+    name: API Support
+    email: support@streetlights.com
+
+servers:
+  production:
+    url: mqtt://localhost:1883
+    protocol: mqtt
+    description: Production MQTT server
+
+defaultContentType: application/json
+
+channels:
+  streetlights/lighting/measured:
+    publish:
+      summary: Inform about environmental lighting conditions for a particular streetlight
+      operationId: onLightMeasured
+      tags:
+        - name: Streetlights
+      message:
+        $ref: '#/components/messages/LightMeasured'
+
+components:
+  messages:
+    LightMeasured:
+      name: LightMeasuredMessage
+      title: Light measured
+      summary: Inform about environmental lighting conditions for a particular streetlight
+      payload:
+        $ref: '#/components/schemas/LightMeasured'
+
+  schemas:
+    LightMeasured:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID of the streetlight.
+        lumens:
+          type: integer
+          description: Light intensity measured in lumens.
+        sentAt:
+          type: string
+          format: date-time
+          description: Date and time when the message was sent. 

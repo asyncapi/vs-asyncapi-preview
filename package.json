@@ -54,8 +54,38 @@
       {
         "command": "asyncapi.visualize",
         "title": "AsyncAPI: EDA Visualizer"
+      },
+      {
+        "command": "asyncapi.lint",
+        "title": "AsyncAPI: Lint Document"
       }
     ],
+    "configuration": {
+      "title": "AsyncAPI",
+      "properties": {
+        "asyncapi.linting.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable AsyncAPI linting"
+        },
+        "asyncapi.linting.autoLintOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically lint AsyncAPI documents when they are saved"
+        },
+        "asyncapi.linting.customRulesetPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to custom Spectral ruleset file (relative to workspace root)"
+        },
+        "asyncapi.logging.level": {
+          "type": "string",
+          "enum": ["none", "error", "warn", "info", "debug"],
+          "default": "info",
+          "description": "Log level for the AsyncAPI extension"
+        }
+      }
+    },
     "snippets": [
       {
         "language": "yaml",
@@ -118,10 +148,13 @@
     "@asyncapi/edavisualiser": "^1.2.0",
     "@asyncapi/parser": "^3.3.0",
     "@asyncapi/react-component": "^2.3.2",
+    "@stoplight/spectral-core": "^1.18.3",
+    "@stoplight/spectral-ruleset-bundler": "^1.5.0",
+    "@stoplight/spectral-rulesets": "^1.6.1",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
-    "@types/node": "14.x",
+    "@types/node": "^14.18.0",
     "@types/vscode": "^1.66.0",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
