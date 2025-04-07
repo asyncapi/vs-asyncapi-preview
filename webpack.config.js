@@ -18,15 +18,16 @@ const extensionConfig = {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'dist'),
     filename: 'extension.js',
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'commonjs2'
   },
+  devtool: 'nosources-source-map',
   externals: {
-    vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    vscode: 'commonjs vscode' // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
     // modules added here also need to be added in the .vscodeignore file
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js'],
+    extensions: ['.ts', '.js']
   },
   module: {
     rules: [
@@ -35,35 +36,59 @@ const extensionConfig = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader',
-          },
-        ],
-      },
-    ],
+            loader: 'ts-loader'
+          }
+        ]
+      }
+    ]
   },
-  devtool: 'nosources-source-map',
   infrastructureLogging: {
     level: 'log', // enables logging required for problem matchers
   },
   plugins: [
-    new CopyPlugin({
+    require('copy-webpack-plugin').default({
       patterns: [
         {
           from: 'node_modules/@asyncapi/react-component/browser/standalone/index.js',
           to: 'node_modules/@asyncapi/react-component/browser/standalone/index.js',
+          noErrorOnMissing: true
         },
         {
           from: 'node_modules/@asyncapi/react-component/styles/default.min.css',
           to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
+          noErrorOnMissing: true
         },
         {
           from: 'node_modules/@asyncapi/edavisualiser/browser/standalone/index.js',
           to: 'node_modules/@asyncapi/edavisualiser/browser/standalone/index.js',
+          noErrorOnMissing: true
         },
         {
           from: 'node_modules/@asyncapi/edavisualiser/styles/default.min.css',
           to: 'node_modules/@asyncapi/edavisualiser/styles/default.min.css',
+          noErrorOnMissing: true
         },
+        // Fallback paths for newer versions
+        {
+          from: 'node_modules/@asyncapi/react-component/web/react-component.js',
+          to: 'node_modules/@asyncapi/react-component/browser/standalone/index.js',
+          noErrorOnMissing: true
+        },
+        {
+          from: 'node_modules/@asyncapi/react-component/web/react-component.css',
+          to: 'node_modules/@asyncapi/react-component/styles/default.min.css',
+          noErrorOnMissing: true
+        },
+        {
+          from: 'node_modules/@asyncapi/edavisualiser/web/eda-visualiser.js',
+          to: 'node_modules/@asyncapi/edavisualiser/browser/standalone/index.js',
+          noErrorOnMissing: true
+        },
+        {
+          from: 'node_modules/@asyncapi/edavisualiser/web/eda-visualiser.css',
+          to: 'node_modules/@asyncapi/edavisualiser/styles/default.min.css',
+          noErrorOnMissing: true
+        }
       ],
     }),
   ],

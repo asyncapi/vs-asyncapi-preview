@@ -1,0 +1,34 @@
+{
+  "rules": {
+    "info-contact-required": {
+      "description": "Info object must have a contact object with name and email",
+      "message": "The info object must contain a contact object with name and email",
+      "severity": "error",
+      "given": "$.info",
+      "then": {
+        "field": "contact",
+        "function": "truthy"
+      }
+    },
+    "operation-description-required": {
+      "description": "All operations must have a description",
+      "message": "Operation must have a description",
+      "severity": "warn",
+      "given": "$..channels.*.[publish,subscribe]",
+      "then": {
+        "field": "description",
+        "function": "truthy"
+      }
+    },
+    "message-examples-recommended": {
+      "description": "Messages should have examples",
+      "message": "Message should include examples",
+      "severity": "info",
+      "given": "$.components.messages.*",
+      "then": {
+        "field": "examples",
+        "function": "truthy"
+      }
+    }
+  }
+} 

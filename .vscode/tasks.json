@@ -4,21 +4,38 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "npm",
-			"script": "watch",
-			"problemMatcher": [
-				"$ts-webpack-watch",
-				"$tslint-webpack-watch"
-			],
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never",
-				"group": "watchers"
+			"label": "npm: install",
+			"type": "shell",
+			"command": "npm install",
+			"group": {
+				"kind": "build",
+				"isDefault": false
 			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"type": "npm",
+			"script": "compile",
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
+			},
+			"problemMatcher": ["$tsc"],
+			"label": "npm: compile",
+			"detail": "webpack"
+		},
+		{
+			"type": "npm",
+			"script": "watch",
+			"group": "build",
+			"problemMatcher": ["$tsc-watch"],
+			"label": "npm: watch",
+			"detail": "webpack --watch",
+			"isBackground": true
 		},
 		{
 			"type": "npm",

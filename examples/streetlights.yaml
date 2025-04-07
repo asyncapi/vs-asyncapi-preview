@@ -1,0 +1,130 @@
+asyncapi: 2.6.0
+info:
+  title: Streetlights API
+  version: '1.0.0'
+  description: |
+    The Streetlights API allows you to remotely manage the city lights.
+  contact:
+    name: API Support
+    email: support@streetlights.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  production:
+    url: mqtt://test.mosquitto.org
+    protocol: mqtt
+    description: Production MQTT server
+    security:
+      - apiKey: []
+  development:
+    url: mqtt://test.mosquitto.org:1883
+    protocol: mqtt
+    description: Development MQTT server
+    security:
+      - apiKey: []
+
+defaultContentType: application/json
+
+channels:
+  streetlights/lighting/measured:
+    description: Topic for light measurements from streetlights
+    publish:
+      summary: Inform about environmental lighting conditions for a particular streetlight.
+      operationId: onLightMeasured
+      tags:
+        - name: environment
+        - name: measurements
+      message:
+        $ref: '#/components/messages/LightMeasured'
+
+  streetlights/lighting/command:
+    description: Topic for streetlight commands
+    subscribe:
+      summary: Command a particular streetlight to turn on/off.
+      operationId: turnOnOff
+      tags:
+        - name: command
+      message:
+        $ref: '#/components/messages/TurnOnOff'
+
+components:
+  messages:
+    LightMeasured:
+      name: LightMeasured
+      title: Light measured
+      summary: Inform about environmental lighting conditions for a particular streetlight.
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: '#/components/schemas/LightMeasuredPayload'
+
+    TurnOnOff:
+      name: TurnOnOff
+      title: Turn on/off
+      summary: Command a particular streetlight to turn on or off.
+      traits:
+        - $ref: '#/components/messageTraits/CommonHeaders'
+      payload:
+        $ref: '#/components/schemas/TurnOnOffPayload'
+
+  schemas:
+    LightMeasuredPayload:
+      type: object
+      properties:
+        streetlightId:
+          type: string
+          description: The ID of the streetlight.
+        lumens:
+          type: integer
+          minimum: 0
+          description: Light intensity measured in lumens.
+        sentAt:
+          $ref: '#/components/schemas/sentAt'
+      required:
+        - streetlightId
+        - lumens
+        - sentAt
+
+    TurnOnOffPayload:
+      type: object
+      properties:
+        streetlightId:
+          type: string
+          description: The ID of the streetlight.
+        command:
+          type: string
+          enum: [on, off]
+          description: Whether to turn on or off the light.
+        sentAt:
+          $ref: '#/components/schemas/sentAt'
+      required:
+        - streetlightId
+        - command
+        - sentAt
+
+    sentAt:
+      type: string
+      format: date-time
+      description: Date and time when the message was sent.
+      example: '2020-03-15T18:30:02Z'
+
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: user
+      description: API key for authentication
+
+  messageTraits:
+    CommonHeaders:
+      headers:
+        type: object
+        properties:
+          correlation-id:
+            type: string
+            description: Correlation ID set by the application for tracing purposes.
+          message-id:
+            type: string
+            description: Unique ID of the message. 
