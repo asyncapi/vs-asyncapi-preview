@@ -69,7 +69,7 @@ async function visualize(filePath: string): Promise<any> {
         application: {
           id: document.info().title() || "Application",
           defaultContentType: document.defaultContentType(),
-          description: document.info().description(),
+          description: document.info().description() || "No Description",
           title: document.info().title(),
           version: document.info().version(),
           license: document.info().license() ? {
@@ -79,7 +79,7 @@ async function visualize(filePath: string): Promise<any> {
           servers: document.servers().all().map(server => ({
             name: server.id(),
             url: server.url(),
-            description: server.description(),
+            description: server.description() || "No Description",
             protocol: server.protocol(),
             protocolVersion: server.protocolVersion()
           })),
@@ -91,7 +91,7 @@ async function visualize(filePath: string): Promise<any> {
       for (const operation of document.operations()) {
         const operationObject = {
           channel: operation.channels().all()[0].address(),
-          description: operation.description() || "",
+          description: operation.channels().all()[0].description() || "",
           id: operation.id(),
           messages: operation.messages().all().map(message => ({
             title: message.title() || message.name() || 'Untitled Message',
