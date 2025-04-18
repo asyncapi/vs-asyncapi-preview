@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from './PreviewWebPanel';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
-import { visualizeAsyncApi } from './Visualizer';
+import { visualizeAsyncApi, openVisualizerFiles } from './Visualizer';
 import { visualizeAsyncApiFocus } from './ApplicationFocusView';
 
 
@@ -33,9 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
     if (vscode.window.activeTextEditor?.document) {
       setAsyncAPIPreviewContext(vscode.window.activeTextEditor.document);
     }
-    if(openAsyncapiFiles[document.uri.fsPath]){
+    if (openVisualizerFiles[document.uri.fsPath]) {
       console.log('Reloading visualizer file', document.uri.fsPath);
-      visualizeAsyncApi(context);
+      visualizeAsyncApi(context)(document.uri);
     }
   });
 
