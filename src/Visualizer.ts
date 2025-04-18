@@ -24,29 +24,40 @@ async function openVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri)
       localResourceRoots.push(folder.uri);
     });
   }
-  const panel = vscode.window.createWebviewPanel(
-    'asyncapi-visualizer',
-    `Visualizer: ${path.basename(uri.fsPath)}`,
-    vscode.ViewColumn.Two,
-    {
-      enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.file(path.dirname(uri.fsPath)),
-        vscode.Uri.joinPath(context.extensionUri, 'dist'),
-      ],
-    }
-  );
+
+  // Check if panel already exists
+  let panel = openVisualizerFiles[uri.fsPath];
+  
+  if (!panel) {
+    // Create new panel only if it doesn't exist
+    panel = vscode.window.createWebviewPanel(
+      'asyncapi-visualizer',
+      `Visualizer: ${path.basename(uri.fsPath)}`,
+      vscode.ViewColumn.Two,
+      {
+        enableScripts: true,
+        localResourceRoots: [
+          vscode.Uri.file(path.dirname(uri.fsPath)),
+          vscode.Uri.joinPath(context.extensionUri, 'dist'),
+        ],
+      }
+    );
     
     panel.title = path.basename(uri.fsPath);
+    
+    panel.onDidDispose(() => {
+      delete openVisualizerFiles[uri.fsPath];
+    });
+    
+    openVisualizerFiles[uri.fsPath] = panel;
+  }
+
   try {
+    // Update the existing panel's content
     panel.webview.html = await getWebviewContent(context, panel.webview, uri);
   } catch (error: any) {
     vscode.window.showErrorMessage(`Failed to visualize AsyncAPI: ${error.message}`);
   }
-  panel.onDidDispose(() => {
-    delete openVisualizerFiles[uri.fsPath];
-  });
-  openVisualizerFiles[uri.fsPath] = panel;
 }
 async function visualize(filePath: string): Promise<any> {
   const parser = new Parser();
@@ -138,11 +149,34 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
     `;
   } else {
     content = `
+      <div id="loading-overlay">
+        <div class="loader"></div>
+        <div class="loading-text">Loading EDA Visualizer...</div>
+      </div>
       <div id="visualizer"></div>
       <script>
         const vscode = acquireVsCodeApi();
         const props = ${JSON.stringify(result)};
-        EDAVisualiserStandalone.renderApplicationView(props, document.getElementById('visualizer'));
+        
+        // Wait for the script to load before rendering
+        function renderVisualizer() {
+          try {
+            if (typeof EDAVisualiserStandalone !== 'undefined') {
+              EDAVisualiserStandalone.renderApplicationView(props, document.getElementById('visualizer'));
+              document.getElementById('loading-overlay').style.display = 'none';
+            } else {
+              // If script is not loaded yet, try again after a short delay
+              setTimeout(renderVisualizer, 100);
+            }
+          } catch (error) {
+            console.error('Error rendering visualizer:', error);
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('visualizer').innerHTML = '<div style="color: red; padding: 20px;">Error rendering visualizer. Please try again.</div>';
+          }
+        }
+
+        // Start the rendering process
+        renderVisualizer();
       </script>
     `;
   }
@@ -163,7 +197,7 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
           width: 100%;
           height: 100%;
         }
-          #error-overlay {
+        #error-overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -184,13 +218,42 @@ async function getWebviewContent(context: vscode.ExtensionContext, webview: vsco
           overflow-y: auto;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        #loading-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .loader {
+          border: 5px solid #f3f3f3;
+          border-top: 5px solid #3498db;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 1s linear infinite;
+          margin-bottom: 20px;
+        }
+        .loading-text {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+          font-size: 16px;
+          color: #333;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
       </style>
     </head>
     <body>
-      <div id="visualizer"></div>
-  
-      <script src="${edavisualiserJs}"></script>
       ${content}
+      <script src="${edavisualiserJs}"></script>
     </body>
   </html>
   `;
