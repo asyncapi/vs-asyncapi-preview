@@ -34,7 +34,6 @@ export function activate(context: vscode.ExtensionContext) {
       setAsyncAPIPreviewContext(vscode.window.activeTextEditor.document);
     }
     if (isAsyncAPIFile(document)) {
-      console.log('File saved. Triggering visualizer reload for', document.uri.fsPath);
       visualizeAsyncApi(context)(document.uri); // Automatically reload the visualizer for the file
     }
   });
