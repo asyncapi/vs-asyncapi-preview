@@ -9,6 +9,13 @@ export function visualizeAsyncApi(context: vscode.ExtensionContext) {
     uri = uri || (await promptForAsyncapiFile()) as vscode.Uri;
     if (uri) {
       console.log('Visualizing asyncapi file', uri.fsPath);
+      if (openVisualizerFiles[uri.fsPath]) {
+        const panel = openVisualizerFiles[uri.fsPath];
+        panel.webview.html = await getWebviewContent(context, panel.webview, uri);
+        panel.reveal(vscode.ViewColumn.Two, true); // bring to front
+        return;
+      }
+
       await openVisualizer(context, uri);
     }
   };
