@@ -44,3 +44,4 @@ AsyncAPI Viewer utilizes the following open source projects:
 ### Contributors
 
 Ivan Garcia Sainz-Aja [ivangsa](https://github.com/ivangsa)
+Ruchi Pakhle [Ruchip16](https://github.com/Ruchip16)

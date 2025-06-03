@@ -1,0 +1,36 @@
+asyncapi: '3.0.0'
+info:
+  title: Payment Events API
+  version: '3.0.0'
+  description: API to notify about successful or failed payments
+servers:
+  payment-server:
+    host: broker.payments.com
+    protocol: kafka
+channels:
+  payment/success:
+    messages:
+      successEvent:
+        title: Payment Success
+        summary: Notifies when payment is successful
+        payload:
+          type: object
+          properties:
+            transactionId:
+              type: string
+            amount:
+              type: number
+            currency:
+              type: string
+  payment/failure:
+    messages:
+      failureEvent:
+        title: Payment Failure
+        summary: Notifies when payment fails
+        payload:
+          type: object
+          properties:
+            transactionId:
+              type: string
+            reason:
+              type: string
