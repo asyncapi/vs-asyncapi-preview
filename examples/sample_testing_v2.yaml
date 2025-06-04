@@ -1,0 +1,14 @@
+asyncapi: '2.6.0'
+info:
+  title: Sample App
+  version: '1.0.0'
+  description: A sample AsyncAPI spec.
+channels:
+  test/topic:
+    subscribe:
+      message:
+        payload:
+          type: object
+          properties:
+            hello:
+              type: string

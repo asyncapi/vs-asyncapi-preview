@@ -1,0 +1,46 @@
+asyncapi: '2.6.0'
+info:
+  title: Streetlight API
+  version: '1.0.0'
+  description: |
+    API for managing smart streetlights in a city using MQTT.
+servers:
+  production:
+    url: mqtt.streetlights.com:{port}
+    protocol: mqtt
+    variables:
+      port:
+        default: '1883'
+channels:
+  smartylights/1/turn/on:
+    subscribe:
+      summary: Turn on streetlight 1
+      message:
+        name: LightCommand
+        payload:
+          type: object
+          properties:
+            command:
+              type: string
+              enum: [on]
+  smartylights/1/turn/off:
+    subscribe:
+      summary: Turn off streetlight 1
+      message:
+        name: LightCommand
+        payload:
+          type: object
+          properties:
+            command:
+              type: string
+              enum: [off]
+components:
+  messages:
+    LightCommand:
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          command:
+            type: string
+            enum: [on, off]
