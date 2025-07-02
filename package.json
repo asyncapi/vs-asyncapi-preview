@@ -67,6 +67,17 @@
         "path": "./snippets/snippets.json"
       }
     ],
+    "configuration": {
+      "type": "object",
+      "title": "AsyncAPI Preview",
+      "properties": {
+        "asyncapiPreview.autoReloadVisualizerOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reload the Event Visualizer when saving an AsyncAPI file if the visualizer is open."
+        }
+      }
+    },
     "menus": {
       "editor/title": [
         {
