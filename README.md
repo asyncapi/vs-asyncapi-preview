@@ -14,10 +14,6 @@ You can open AsyncAPI Preview from the editor title/context menu. (If you don't 
 
 Automatic hot-reloading on editor save, but currently, it doesn't reload when saving referenced external files.
 
-### Settings
-
-The Event Visualizer can be reloaded automatically when you save an AsyncAPI file. Control this behaviour with the `asyncapiPreview.autoReloadVisualizerOnSave` setting (enabled by default).
-
 ## Content Assistance
 
 ### Available snippets:
