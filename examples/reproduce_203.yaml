@@ -1,0 +1,28 @@
+asyncapi: 3.0.0
+info:
+  title: Show defect Service
+  version: 1.0.0
+  description: This message payload structures are not rendered completely
+components:
+  schemas:
+    BlockItem:
+      description: An item in a block. 
+      type: object
+      properties:
+        Id:
+          type: string
+          format: guid
+        Name:
+          type: string
+  messages:
+    Add:
+      description: Block item structure is only expaned for non array property
+      payload:
+        type: object
+        properties:
+          BlockItem:
+            $ref: '#/components/schemas/BlockItem'
+          BlockItems:
+            type: array
+            items:
+              $ref: '#/components/schemas/BlockItem'
