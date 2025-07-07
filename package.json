@@ -24,7 +24,7 @@
     "url": "https://github.com/asyncapi/vs-asyncapi-preview.git"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
