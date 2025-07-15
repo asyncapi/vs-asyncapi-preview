@@ -94,7 +94,7 @@ async function visualize(filePath: string): Promise<any> {
         incomingOperations: [] as any,
         outgoingOperations: [] as any,
       };
-      
+
       for (const operation of document.operations()) {
         const operationObject = {
           channel: operation.channels().all()[0].address(),

@@ -3,10 +3,18 @@ import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI } from
 import { asyncapiSmartPaste } from './SmartPasteCommand';
 import { visualizeAsyncApi } from './Visualizer';
 import { visualizeAsyncApiFocus } from './ApplicationFocusView';
-
+import { AsyncAPIHoverProvider } from './HoverProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "asyncapi-preview" is now active!');
+
+  // Hover provider for YAML and JSON
+  context.subscriptions.push(
+    vscode.languages.registerHoverProvider(
+      [{ language: 'yaml', scheme: 'file' }, { language: 'json', scheme: 'file' }],
+      new AsyncAPIHoverProvider()
+    )
+  );
 
   // sets context to show "AsyncAPI Preview" button on Editor Title Bar
   function setAsyncAPIPreviewContext(document: vscode.TextDocument) {
