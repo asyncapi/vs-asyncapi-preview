@@ -60,7 +60,7 @@ async function visualize(filePath: string): Promise<any> {
   try {
     const { document, diagnostics } = await fromFile(parser, filePath).parse();
     const errors = diagnostics.filter(d => d.severity === 0);
-    console.log("errors", errors);  
+    console.log("errors", errors);
     console.log("diagnostics", diagnostics);
     if (errors.length > 0) {
       return {
@@ -94,7 +94,7 @@ async function visualize(filePath: string): Promise<any> {
         incomingOperations: [] as any,
         outgoingOperations: [] as any,
       };
-      
+
       for (const operation of document.operations()) {
         const operationObject = {
           channel: operation.channels().all()[0].address(),
