@@ -2,32 +2,11 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { Parser, fromFile } from '@asyncapi/parser';
-import { validateAsyncAPISchema } from './validateAgainstSchema';
 
 let position : {x:0,y:0} = {
   x: 0,
   y: 0
 };
-
-(async () => {
-  try {
-    // ✅ 1. Run custom AJV-based validator
-    validateSchema(uri);
-
-    // ✅ 2. Run asyncapi-parser diagnostics (optional — you're already doing this)
-    const parser = new Parser();
-    const { diagnostics } = await fromFile(parser, uri.fsPath).parse();
-    const errors = diagnostics.filter(d => d.severity === 0);
-    if (errors.length > 0) {
-      const top = errors[0];
-      vscode.window.showWarningMessage(`AsyncAPI validation issue: ${top.message} (at ${top.path.join('.')})`);
-    }
-  } catch (e) {
-    console.warn('Parsing failed, skipping diagnostics warning:', e);
-  }
-
-  panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
-})();
 
 export function previewAsyncAPI(context: vscode.ExtensionContext) {
  return async (uri: vscode.Uri) => {
@@ -79,22 +58,7 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
     });
 
   panel.title = path.basename(uri.fsPath);
-
-  (async () => {
-    try {
-      const parser = new Parser();
-      const { diagnostics } = await fromFile(parser, uri.fsPath).parse();
-      const errors = diagnostics.filter(d => d.severity === 0); // 0 = error
-      if (errors.length > 0) {
-        const top = errors[0];
-        vscode.window.showWarningMessage(`AsyncAPI validation issue: ${top.message} (at ${top.path.join('.')})`);
-      }
-    } catch (e) {
-      console.warn('Parsing failed, skipping diagnostics warning:', e);
-    }
-
-    panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
-  })();
+  panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
 
   panel.webview.onDidReceiveMessage(
     message => {
@@ -104,7 +68,6 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
             x: message.scrollX,
             y: message.scrollY,
           };
-          break;
         }
       }
     },
@@ -204,8 +167,4 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   </html>
     `;
   return html;
-}
-
-function validateSchema(uri: any) {
-  throw new Error('Function not implemented.');
 }
