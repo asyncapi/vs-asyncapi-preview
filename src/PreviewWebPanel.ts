@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Parser, fromFile } from '@asyncapi/parser';
 
 let position : {x:0,y:0} = {
   x: 0,
@@ -58,16 +59,15 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
 
   panel.title = path.basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
-          
+
   panel.webview.onDidReceiveMessage(
     message => {
       switch (message.type) {
-        case 'position':{
+        case 'position': {
           position = {
             x: message.scrollX,
-            y: message.scrollY
+            y: message.scrollY,
           };
-          
         }
       }
     },
@@ -78,6 +78,7 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
   panel.onDidDispose(() => {
     delete openAsyncapiFiles[uri.fsPath];
   });
+
   openAsyncapiFiles[uri.fsPath] = panel;
 }
 
