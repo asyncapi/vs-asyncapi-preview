@@ -12,12 +12,12 @@ You can open AsyncAPI Preview from the editor title/context menu. (If you don't 
 
 ## Web Extension Compatibility
 
-The extension now runs in the web version of VS Code i.e. directly in your browser on `vscode.dev` and `github.dev`, as well as a local browser host for development.
+The extension now runs in the web version of VS Code i.e. directly in your browser on `vscode.dev`, `github.dev`, `gitlab.com/-/ide`, `gitpod.io`, and other cloud development environments, as well as a local browser host for development.
 
 ### Key Benefits
 
 - No install required: open a repo in your browser and preview AsyncAPI files without a desktop VS Code.
-- Works on vscode.dev & github.dev: perfect for quick reviews during PRs or exploring examples.
+- Works on vscode.dev, github.dev, GitLab Web IDE, Gitpod & more: perfect for quick reviews during PRs or exploring examples.
 - Consistent experience: same preview workflow on desktop and web.
 
 ### Usage
