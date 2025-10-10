@@ -53,10 +53,6 @@
         "title": "AsyncAPI: Paste as Schema"
       },
       {
-        "command": "asyncapi.visualize",
-        "title": "AsyncAPI: EDA Visualizer"
-      },
-      {
         "command": "asyncapi.focusview",
         "title": "AsyncAPI: Focus View"
       }
