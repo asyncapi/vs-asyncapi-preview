@@ -37,7 +37,7 @@ npm install
 npm run build
 ```
 
-2. (If not already present) add a dev script to package.json to launch a web host:
+2. Add a dev script to package.json to launch a web host:
 
 ```
 {
