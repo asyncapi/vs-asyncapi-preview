@@ -31,6 +31,7 @@ A) On vscode.dev / github.dev
 4. Run AsyncAPI: Preview Document from the Command Palette (⇧⌘P / Ctrl+Shift+P).
 
 B) Locally in a browser (dev/test)
+
 1. Install dependencies & build:
 ```
 npm install
