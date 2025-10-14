@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
+import { basename, dirname } from './pathUtils';
 
 let position : {x:0,y:0} = {
   x: 0,
@@ -39,7 +38,7 @@ export function isAsyncAPIFile(document?: vscode.TextDocument) {
 
 export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) {
   const localResourceRoots = [
-    vscode.Uri.file(path.dirname(uri.fsPath)),
+    vscode.Uri.file(dirname(uri.fsPath)),
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/browser/standalone'),
     vscode.Uri.joinPath(context.extensionUri, 'dist/node_modules/@asyncapi/react-component/styles'),
   ];
@@ -56,9 +55,9 @@ export function openAsyncAPI(context: vscode.ExtensionContext, uri: vscode.Uri) 
       localResourceRoots,
     });
 
-  panel.title = path.basename(uri.fsPath);
+  panel.title = basename(uri.fsPath);
   panel.webview.html = getWebviewContent(context, panel.webview, uri, position);
-          
+
   panel.webview.onDidReceiveMessage(
     message => {
       switch (message.type) {
@@ -106,7 +105,6 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   );
   const asyncapiWebviewUri = webview.asWebviewUri(asyncapiFile);
   const asyncapiBasePath = asyncapiWebviewUri.toString().replace('%2B', '+'); // this is loaded by a different library so it requires unescaping the + character
-  const asyncapiContent = fs.readFileSync(asyncapiFile.fsPath, 'utf-8');
 
   const html = `
   <!DOCTYPE html>
