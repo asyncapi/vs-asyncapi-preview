@@ -33,6 +33,7 @@ A) On vscode.dev / github.dev
 B) Locally in a browser (dev/test)
 
 1. Install dependencies & build:
+
 ```
 npm install
 npm run build
@@ -52,6 +53,7 @@ npm run build
 ```
 
 Then:
+
 ```
 npm run open-in-browser
 ```
