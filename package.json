@@ -117,7 +117,7 @@
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. --port=8082"
   },
   "devDependencies": {
-    "@asyncapi/react-component": "^2.3.2",
+    "@asyncapi/react-component": "^2.6.5",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
