@@ -6,7 +6,7 @@ Preview AsyncAPI documents inside VSCode.
 
 AsyncAPI Preview was simplified and reworked from scratch to use the latest [@asyncapi/asyncapi-react](https://github.com/asyncapi/asyncapi-react/tree/next), removing old dependencies on Express, socket.io and js-yaml with better startup performance and bundle size.
 
-You can open AsyncAPI Preview from the editor title/context menu. (If you don't see that button, you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`.)
+You can open AsyncAPI Preview from the editor title/context menu. (If you don't see that button, you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`)
 
 ![AsyncAPI Preview](docs/asyncapi-editor-title-context.png)
 
