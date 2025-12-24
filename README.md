@@ -57,6 +57,7 @@ Then:
 ```
 npm run open-in-browser
 ```
+
 This opens a web VS Code at http://localhost:8082. Open a workspace/folder that contains your AsyncAPI YAMLs, then run AsyncAPI: Preview Document.
 
 Tip: If you don’t see the preview, ensure your file’s language mode is YAML (bottom-right of the status bar), and check Developer: Show Running Extensions to confirm activation.
