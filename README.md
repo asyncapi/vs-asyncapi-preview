@@ -6,7 +6,7 @@ Preview AsyncAPI documents inside VSCode.
 
 AsyncAPI Preview was simplified and reworked from scratch to use the latest [@asyncapi/asyncapi-react](https://github.com/asyncapi/asyncapi-react/tree/next), removing old dependencies on Express, socket.io and js-yaml with better startup performance and bundle size.
 
-You can open AsyncAPI Preview from the editor title/context menu. (If you don't see that button, you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`.)
+You can open AsyncAPI Preview from the editor title/context menu. (If you don't see that button, you can use `shift+command+P` to open command palette and select `Preview AsyncAPI`)
 
 ![AsyncAPI Preview](docs/asyncapi-editor-title-context.png)
 
@@ -33,6 +33,7 @@ A) On vscode.dev / github.dev
 B) Locally in a browser (dev/test)
 
 1. Install dependencies & build:
+
 ```
 npm install
 npm run build
@@ -52,9 +53,11 @@ npm run build
 ```
 
 Then:
+
 ```
 npm run open-in-browser
 ```
+
 This opens a web VS Code at http://localhost:8082. Open a workspace/folder that contains your AsyncAPI YAMLs, then run AsyncAPI: Preview Document.
 
 Tip: If you don’t see the preview, ensure your file’s language mode is YAML (bottom-right of the status bar), and check Developer: Show Running Extensions to confirm activation.
@@ -105,3 +108,4 @@ AsyncAPI Viewer utilizes the following open source projects:
 
 Ivan Garcia Sainz-Aja [ivangsa](https://github.com/ivangsa)
 Ruchi Pakhle [Ruchip16](https://github.com/Ruchip16)
+
