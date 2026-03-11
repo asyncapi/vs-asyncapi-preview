@@ -76,7 +76,7 @@ Automatic hot-reloading on editor save, but currently, it doesn't reload when sa
 
 ## Content Assistance
 
-### Available snippets:
+### Available snippets
 
 Open an empty or otherwise yaml file and start typing one of the following prefixes, you may need to press `Ctrl+space` to trigger autocompletion in some cases:
 
