@@ -37,7 +37,21 @@
     "onCommand:asyncapi.visualize",
     "onCommand:asyncapi.focusview"
   ],
-  "browser": "./dist/extension.js",
+  "main": "./dist/node/extension.js",
+  "browser": "./dist/web/extension.js",
+  "extensionKind": ["ui"],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Previewing remains available. Extension-host reference resolution and secret access require a trusted workspace.",
+      "restrictedConfigurations": [
+        "asyncapi.remoteRefs.resolve",
+        "asyncapi.remoteAuth",
+        "asyncapi.loaders",
+        "asyncapi.allowedHosts"
+      ]
+    }
+  },
   "contributes": {
     "commands": [
       {
@@ -55,8 +69,144 @@
       {
         "command": "asyncapi.focusview",
         "title": "AsyncAPI: Focus View"
+      },
+      {
+        "command": "asyncapi.setSecret",
+        "title": "AsyncAPI: Set Secret",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "asyncapi.deleteSecret",
+        "title": "AsyncAPI: Delete Secret",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "asyncapi.clearRemoteCache",
+        "title": "AsyncAPI: Clear Remote Reference Cache"
       }
     ],
+    "configuration": {
+      "title": "AsyncAPI Preview",
+      "properties": {
+        "asyncapi.remoteRefs.resolve": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Resolve external $refs in the extension host only when asyncapi.loaders, asyncapi.remoteAuth or asyncapi.allowedHosts is configured. Otherwise the preview loads the document in the webview, as it always did.",
+            "Always resolve external $refs in the extension host, even without authentication configured.",
+            "Never resolve external $refs in the extension host."
+          ],
+          "default": "auto",
+          "scope": "resource",
+          "markdownDescription": "When the extension host resolves external `$ref`s before rendering the preview. Host side resolution is what makes authentication, corporate proxies and non CORS servers work, and it is required for `#asyncapi.remoteAuth#` and `#asyncapi.loaders#`."
+        },
+        "asyncapi.remoteAuth": {
+          "type": "object",
+          "default": {},
+          "scope": "resource",
+          "description": "Default authentication used for any remote $ref that does not match an asyncapi.loaders entry. Only sent to hosts listed in asyncapi.allowedHosts.",
+          "properties": {
+            "headers": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "description": "Static HTTP headers."
+            },
+            "bearerToken": {
+              "type": "string",
+              "description": "Bearer token value."
+            },
+            "bearerTokenSecret": {
+              "type": "string",
+              "description": "Secret key holding the bearer token (see the 'AsyncAPI: Set Secret' command)."
+            },
+            "basic": {
+              "type": "object",
+              "description": "HTTP basic authentication.",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                },
+                "passwordSecret": {
+                  "type": "string",
+                  "description": "Secret key holding the password (see the 'AsyncAPI: Set Secret' command)."
+                }
+              }
+            }
+          }
+        },
+        "asyncapi.loaders": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Per host authentication for remote $refs. The first entry whose match applies wins.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "match": {
+                "type": "string",
+                "description": "URL prefix or JavaScript regular expression source matched against the requested reference."
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "bearerToken": {
+                "type": "string"
+              },
+              "bearerTokenSecret": {
+                "type": "string"
+              },
+              "basic": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "passwordSecret": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "asyncapi.allowedHosts": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Hosts allowed to serve remote $refs. When empty every public host can be read; loopback, private and link-local addresses always require the host to be listed here or pinned by an asyncapi.loaders URL prefix. Listing a host here also authorises sending it the configured credentials, which asyncapi.remoteAuth and regular expression loaders require. An entry with a port matches that port only, an entry without one matches any port.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "asyncapi.outputVerbosity": {
+          "type": "string",
+          "enum": [
+            "off",
+            "error",
+            "info",
+            "debug"
+          ],
+          "default": "off",
+          "scope": "resource",
+          "description": "Controls logging verbosity in the AsyncAPI Preview output channel."
+        }
+      }
+    },
     "snippets": [
       {
         "language": "yaml",
@@ -112,16 +262,17 @@
     "package": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
     "test": "",
+    "test:remote-refs": "node --test tests/remoteRefs.test.cjs",
     "generate:assets": "",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. --port=8082"
   },
   "devDependencies": {
-    "@asyncapi/react-component": "^3.1.4",
+    "@asyncapi/react-component": "3.1.4",
     "@types/glob": "^7.2.0",
     "@types/js-yaml": "^4.0.5",
     "@types/mocha": "^9.1.1",
-    "@types/node": "14.x",
+    "@types/node": "^18.19.0",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^5.21.0",
     "@typescript-eslint/parser": "^5.21.0",
@@ -132,6 +283,7 @@
     "eslint": "^8.14.0",
     "genson-js": "0.0.8",
     "glob": "^8.0.1",
+    "js-yaml": "^4.1.0",
     "mocha": "^9.2.2",
     "ts-loader": "^9.2.8",
     "typescript": "^4.6.4",

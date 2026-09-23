@@ -1,5 +1,9 @@
 .github
 .gitignore
+.npmrc
+debug.log
+fixtures/**
+tests/**
 .yarnrc
 webpack.config.js
 vsc-extension-quickstart.md

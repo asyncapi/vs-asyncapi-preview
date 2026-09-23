@@ -1,0 +1,11 @@
+Ping:
+  name: Ping
+  contentType: application/json
+  payload:
+    type: object
+    properties:
+      id:
+        type: string
+      sentAt:
+        type: string
+        format: date-time

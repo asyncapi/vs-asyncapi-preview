@@ -1,0 +1,24 @@
+asyncapi: 2.6.0
+info:
+  title: Remote references example
+  version: 1.0.0
+  description: |
+    Manual test fixture for host side `$ref` resolution.
+
+    * `remote` uses an absolute HTTPS reference, which is resolved by the extension
+      host (applying `asyncapi.remoteAuth` / `asyncapi.loaders` when the host needs
+      authentication) and inlined under the root `x-remote-refs` extension.
+    * `local` uses a relative workspace reference, left intact for the webview
+      to load through its existing resource access controls. HTTP(S) `$ref`s that
+      appear only inside that file are not followed on a bundled preview.
+channels:
+  smartylighting/streetlights/event/lighting/measured:
+    description: Message coming from a remote document
+    subscribe:
+      message:
+        $ref: 'https://raw.githubusercontent.com/asyncapi/spec/v2.6.0/examples/streetlights-kafka.yml#/components/messages/lightMeasured'
+  local/ping:
+    description: Message coming from a relative document
+    subscribe:
+      message:
+        $ref: './messages.yaml#/Ping'
