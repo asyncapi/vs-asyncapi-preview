@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { DocumentResolver } from './DocumentResolver';
 import { Logger } from './logger';
 import { isAsyncAPIFile, openAsyncAPI, openAsyncapiFiles, previewAsyncAPI, reloadOpenPreviews } from './PreviewWebPanel';
+import { offerSaveSecretForAuthFailure, registerSecretCommands } from './secretCommands';
 import { asyncapiSmartPaste } from './SmartPasteCommand';
 
 
@@ -10,7 +11,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   const output = vscode.window.createOutputChannel('AsyncAPI Preview');
   const logger = new Logger(output);
-  const resolver = new DocumentResolver(context, logger);
+  const resolver = new DocumentResolver(context, logger, info =>
+    offerSaveSecretForAuthFailure(context, info, { resource: info.documentUri })
+  );
   context.subscriptions.push(output);
 
   // sets context to show "AsyncAPI Preview" button on Editor Title Bar
@@ -75,53 +78,12 @@ export function activate(context: vscode.ExtensionContext) {
       resolver.clear();
       refreshOpenPreviews();
     }),
-    vscode.commands.registerCommand('asyncapi.setSecret', async () => {
-      if (!canManageSecrets()) {
-        return;
-      }
-      const key = await vscode.window.showInputBox({
-        title: 'AsyncAPI secret key',
-        prompt: 'Name used by the passwordSecret or bearerTokenSecret settings',
-        ignoreFocusOut: true,
-      });
-
-      if (!key) {
-        return;
-      }
-
-      const value = await vscode.window.showInputBox({
-        title: `Set AsyncAPI secret: ${key}`,
-        password: true,
-        ignoreFocusOut: true,
-      });
-
-      if (value !== undefined) {
-        if (!canManageSecrets()) {
-          return;
-        }
-        await context.secrets.store(key, value);
+    registerSecretCommands(context, {
+      canManageSecrets,
+      onSecretsChanged: () => {
         resolver.clear();
         refreshOpenPreviews();
-      }
-    }),
-    vscode.commands.registerCommand('asyncapi.deleteSecret', async () => {
-      if (!canManageSecrets()) {
-        return;
-      }
-      const key = await vscode.window.showInputBox({
-        title: 'Delete AsyncAPI secret',
-        prompt: 'Secret key to delete',
-        ignoreFocusOut: true,
-      });
-
-      if (key) {
-        if (!canManageSecrets()) {
-          return;
-        }
-        await context.secrets.delete(key);
-        resolver.clear();
-        refreshOpenPreviews();
-      }
+      },
     })
   );
 }

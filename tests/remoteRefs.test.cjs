@@ -16,7 +16,7 @@ function loadSource(file, overrides = {}) {
     if (name.startsWith('.')) return loadSource(path.relative(path.resolve(__dirname, '..'), path.resolve(path.dirname(filename), name + '.ts')), overrides);
     return require(name);
   };
-  new Function('require', 'module', 'exports', code)(localRequire, module, module.exports);
+  new Function('require', 'module', 'exports', '__WEB_EXTENSION__', code)(localRequire, module, module.exports, false);
   return module.exports;
 }
 
@@ -72,6 +72,110 @@ test('remote documents cannot reference filesystem dependencies', async () => {
     }), /remote documents can only reference other HTTP\(S\) documents/);
     assert.deepEqual(reads, [remoteUrl]);
   }
+});
+
+test('remote reader retries once after an HTTP 401 when onAuthFailure saves a secret', async () => {
+  const requests = [];
+  let status = 401;
+  const { createRemoteReader } = loadSource('src/remoteFetch.ts', {
+    vscode: { workspace: { isTrusted: true } },
+    './http/nodeHttp': {
+      nodeHttpGet: async (url, headers) => {
+        requests.push({ url, authorization: headers.Authorization });
+        const current = status;
+        status = 200;
+        return {
+          status: current,
+          statusText: current === 401 ? 'Unauthorized' : 'OK',
+          headers: {},
+          body: 'Remote:\n  type: object\n'
+        };
+      }
+    },
+    './http/webHttp': { webHttpGet: async () => { throw new Error('web transport'); } }
+  });
+
+  const secrets = { k: undefined };
+  const context = { secrets: { get: async key => secrets[key] } };
+  const loaders = [{ match: 'https://registry.example/', basic: { username: 'ada', passwordSecret: 'k' } }];
+  const reader = createRemoteReader(
+    context,
+    () => ({
+      remoteRefsMode: 'auto',
+      remoteAuth: {},
+      loaders,
+      allowedHosts: [],
+      outputVerbosity: 'off'
+    }),
+    { debug() {}, info() {}, error() {}, failure() {} },
+    {
+      onAuthFailure: async () => {
+        secrets.k = 's3cret';
+        return true;
+      }
+    }
+  );
+
+  assert.equal(await reader('https://registry.example/messages.yaml'), 'Remote:\n  type: object\n');
+  assert.equal(requests.length, 2);
+  assert.equal(requests[0].authorization, undefined);
+  assert.match(requests[1].authorization, /^Basic /);
+});
+
+test('remote reader does not offer a secret retry when the URL already carries credentials', async () => {
+  let authFailureCalls = 0;
+  const { createRemoteReader } = loadSource('src/remoteFetch.ts', {
+    vscode: { workspace: { isTrusted: true } },
+    './http/nodeHttp': {
+      nodeHttpGet: async () => ({ status: 401, statusText: 'Unauthorized', headers: {}, body: '' })
+    },
+    './http/webHttp': { webHttpGet: async () => { throw new Error('web transport'); } }
+  });
+
+  const reader = createRemoteReader(
+    { secrets: { get: async () => 's3cret' } },
+    () => ({
+      remoteRefsMode: 'auto',
+      remoteAuth: {},
+      loaders: [{ match: 'https://registry.example/', basic: { username: 'ada', passwordSecret: 'k' } }],
+      allowedHosts: [],
+      outputVerbosity: 'off'
+    }),
+    { debug() {}, info() {}, error() {}, failure() {} },
+    { onAuthFailure: async () => { authFailureCalls++; return true; } }
+  );
+
+  await assert.rejects(reader('https://user:wrong@registry.example/messages.yaml'), /HTTP 401/);
+  assert.equal(authFailureCalls, 0);
+});
+
+test('declining a secret retry suppresses further prompts for that host in the same resolve only', async () => {
+  let authFailureCalls = 0;
+  const { createRemoteReader } = loadSource('src/remoteFetch.ts', {
+    vscode: { workspace: { isTrusted: true } },
+    './http/nodeHttp': {
+      nodeHttpGet: async () => ({ status: 401, statusText: 'Unauthorized', headers: {}, body: '' })
+    },
+    './http/webHttp': { webHttpGet: async () => { throw new Error('web transport'); } }
+  });
+
+  const config = () => ({
+    remoteRefsMode: 'auto',
+    remoteAuth: {},
+    loaders: [{ match: 'https://registry.example/', basic: { username: 'ada', passwordSecret: 'k' } }],
+    allowedHosts: [],
+    outputVerbosity: 'off'
+  });
+  const reader = createRemoteReader(
+    { secrets: { get: async () => undefined } },
+    config,
+    { debug() {}, info() {}, error() {}, failure() {} },
+    { onAuthFailure: async () => { authFailureCalls++; return false; } }
+  );
+
+  await assert.rejects(reader('https://registry.example/a.yaml'), /HTTP 401/);
+  await assert.rejects(reader('https://registry.example/b.yaml'), /HTTP 401/);
+  assert.equal(authFailureCalls, 1);
 });
 
 test('resolver rejects non-HTTP readers without accessing the workspace filesystem', async () => {

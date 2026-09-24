@@ -119,11 +119,11 @@
             },
             "bearerToken": {
               "type": "string",
-              "description": "Bearer token value."
+              "markdownDescription": "Not recommended. Token stored in `settings.json` (may be synced or committed). Prefer `#asyncapi.remoteAuth#` `bearerTokenSecret` and **AsyncAPI: Set Secret**."
             },
             "bearerTokenSecret": {
               "type": "string",
-              "description": "Secret key holding the bearer token (see the 'AsyncAPI: Set Secret' command)."
+              "markdownDescription": "Key of a bearer token stored by **AsyncAPI: Set Secret**. `settings.json` keeps only this name; the token is in the OS keychain."
             },
             "basic": {
               "type": "object",
@@ -133,11 +133,12 @@
                   "type": "string"
                 },
                 "password": {
-                  "type": "string"
+                  "type": "string",
+                  "markdownDescription": "Not recommended. Password stored in `settings.json` (may be synced or committed). Prefer `passwordSecret` and **AsyncAPI: Set Secret**."
                 },
                 "passwordSecret": {
                   "type": "string",
-                  "description": "Secret key holding the password (see the 'AsyncAPI: Set Secret' command)."
+                  "markdownDescription": "Key of a password stored by **AsyncAPI: Set Secret**. `settings.json` keeps only this name; the password is in the OS keychain."
                 }
               }
             }
@@ -162,10 +163,12 @@
                 }
               },
               "bearerToken": {
-                "type": "string"
+                "type": "string",
+                "markdownDescription": "Not recommended. Token stored in `settings.json`. Prefer `bearerTokenSecret` and **AsyncAPI: Set Secret**."
               },
               "bearerTokenSecret": {
-                "type": "string"
+                "type": "string",
+                "markdownDescription": "Key of a bearer token stored by **AsyncAPI: Set Secret**."
               },
               "basic": {
                 "type": "object",
@@ -174,10 +177,12 @@
                     "type": "string"
                   },
                   "password": {
-                    "type": "string"
+                    "type": "string",
+                    "markdownDescription": "Not recommended. Password stored in `settings.json`. Prefer `passwordSecret` and **AsyncAPI: Set Secret**."
                   },
                   "passwordSecret": {
-                    "type": "string"
+                    "type": "string",
+                    "markdownDescription": "Key of a password stored by **AsyncAPI: Set Secret**."
                   }
                 }
               }
@@ -262,7 +267,7 @@
     "package": "webpack --mode production --devtool hidden-source-map",
     "lint": "eslint src --ext ts",
     "test": "",
-    "test:remote-refs": "node --test tests/remoteRefs.test.cjs",
+    "test:remote-refs": "node --test tests/remoteRefs.test.cjs tests/secretSettings.test.cjs",
     "generate:assets": "",
     "bump:version": "npm --no-git-tag-version --allow-same-version version $VERSION",
     "open-in-browser": "vscode-test-web --extensionDevelopmentPath=. --port=8082"

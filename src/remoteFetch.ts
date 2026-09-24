@@ -5,37 +5,13 @@ import { Logger, sanitizeText, sanitizeUrl } from './logger';
 import { HttpGet, MAX_RESPONSE_BYTES } from './http/transport';
 import { nodeHttpGet } from './http/nodeHttp';
 import { webHttpGet } from './http/webHttp';
+import { findLoader } from './loaderMatch';
+
+export { findLoader } from './loaderMatch';
 
 const MAX_REDIRECTS = 5;
 
 const httpGet: HttpGet = __WEB_EXTENSION__ ? webHttpGet : nodeHttpGet;
-
-/**
- * Returns the first loader whose `match` is either a URL prefix or a regular
- * expression matching the requested URL.
- */
-export function findLoader(url: string, loaders: LoaderConfig[]): LoaderConfig | undefined {
-  return loaders.find(loader => {
-    if (!loader.match) {
-      return false;
-    }
-
-    if (/^https?:\/\//i.test(loader.match)) {
-      try {
-        // URL prefixes are literal and must never fall back to regex matching.
-        return new URL(url).origin === new URL(loader.match).origin && url.startsWith(loader.match);
-      } catch (e) {
-        return false;
-      }
-    }
-
-    try {
-      return new RegExp(loader.match).test(url);
-    } catch (e) {
-      return false;
-    }
-  });
-}
 
 /**
  * Creates a reader for `http(s)` references that applies the configured
@@ -43,9 +19,13 @@ export function findLoader(url: string, loaders: LoaderConfig[]): LoaderConfig |
  */
 export function createRemoteReader(
   context: vscode.ExtensionContext,
-  config: ExtensionConfig,
-  logger: Logger
+  getConfig: () => ExtensionConfig,
+  logger: Logger,
+  options?: { onAuthFailure?: (info: { url: string; status: number }) => Promise<boolean> }
 ): (url: string) => Promise<string> {
+  const authRetried = new Set<string>();
+  const authDeclinedHosts = new Set<string>();
+
   return async (requestedUrl: string) => {
     let currentUrl = requestedUrl;
 
@@ -54,6 +34,7 @@ export function createRemoteReader(
         throw new Error('AsyncAPI extension-host reference resolution requires a trusted workspace.');
       }
 
+      const config = getConfig();
       const credentials = resolveUrlCredentialHeaders(currentUrl);
       assertAllowedHost(credentials.url, config);
 
@@ -72,6 +53,7 @@ export function createRemoteReader(
         );
       }
 
+      const urlCredentials = Boolean(credentials.headers.Authorization);
       const headers = {
         Accept: 'application/json, application/yaml, text/yaml, text/plain, */*',
         ...(pinned ? await resolveHeaders(context, auth) : {}),
@@ -96,6 +78,23 @@ export function createRemoteReader(
         }
         logger.debug(config.outputVerbosity, `Following redirect to ${sanitizeUrl(currentUrl)}.`);
         continue;
+      }
+
+      const host = new URL(credentials.url).host;
+      if (
+        isAuthFailure(response.status) &&
+        pinned &&
+        !urlCredentials &&
+        options?.onAuthFailure &&
+        !authRetried.has(credentials.url) &&
+        !authDeclinedHosts.has(host)
+      ) {
+        authRetried.add(credentials.url);
+        if (await options.onAuthFailure({ url: credentials.url, status: response.status })) {
+          redirects--;
+          continue;
+        }
+        authDeclinedHosts.add(host);
       }
 
       if (response.status < 200 || response.status >= 300) {
@@ -261,6 +260,10 @@ function matchPinsHost(match: string, url: string): boolean {
 
 function isRedirect(status: number): boolean {
   return status === 301 || status === 302 || status === 303 || status === 307 || status === 308;
+}
+
+function isAuthFailure(status: number): boolean {
+  return status === 401 || status === 403;
 }
 
 function authenticationHint(status: number): string {

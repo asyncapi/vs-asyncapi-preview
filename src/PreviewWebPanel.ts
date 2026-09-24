@@ -3,6 +3,7 @@ import { getConfig, shouldResolveInHost } from './config';
 import { DocumentResolver } from './DocumentResolver';
 import { Logger, sanitizeText } from './logger';
 import { basename, dirname } from './pathUtils';
+import { warnPlaintextCredentials } from './secretCommands';
 
 interface ScrollPosition {
   x: number;
@@ -82,7 +83,7 @@ export async function openAsyncAPI(
 
   panel.title = basename(uri.fsPath);
 
-  const resolved = await resolveDocument(uri, resolver, logger);
+  const resolved = await resolveDocument(context, uri, resolver, logger);
   panel.webview.html = resolved.error
     ? getErrorWebviewContent(basename(uri.fsPath), resolved.error)
     : getWebviewContent(context, panel.webview, uri, position, resolved.document);
@@ -117,6 +118,7 @@ export async function openAsyncAPI(
  * webview keeps loading the file by URL exactly as before.
  */
 async function resolveDocument(
+  context: vscode.ExtensionContext,
   uri: vscode.Uri,
   resolver: DocumentResolver,
   logger: Logger
@@ -125,6 +127,8 @@ async function resolveDocument(
   if (!shouldResolveInHost(config)) {
     return {};
   }
+
+  warnPlaintextCredentials(context, config, logger);
 
   try {
     const textDocument = await vscode.workspace.openTextDocument(uri);
@@ -280,9 +284,9 @@ function getErrorWebviewContent(title: string, message: string) {
     <body>
       <h2>Could not resolve ${escapeHtml(title)}</h2>
       <pre>${escapeHtml(message)}</pre>
-      <p>See the <em>AsyncAPI Preview</em> output channel for details. Remote references are
-      configured with the <code>asyncapi.remoteAuth</code>, <code>asyncapi.loaders</code> and
-      <code>asyncapi.allowedHosts</code> settings.</p>
+      <p>See the <em>AsyncAPI Preview</em> output channel for details. Named secrets are stored with
+      <strong>AsyncAPI: Set Secret</strong> and referenced from settings as
+      <code>passwordSecret</code> or <code>bearerTokenSecret</code>.</p>
     </body>
   </html>
   `;

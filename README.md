@@ -123,10 +123,10 @@ Both `asyncapi.remoteAuth` and every `asyncapi.loaders` entry accept:
 | Field | Description |
 | --- | --- |
 | `headers` | Static HTTP headers, e.g. `{ "X-Api-Key": "..." }` |
-| `bearerToken` | Token sent as `Authorization: Bearer <token>` |
-| `bearerTokenSecret` | Key of a token stored in the VS Code SecretStorage |
-| `basic.username` / `basic.password` | HTTP basic authentication |
-| `basic.passwordSecret` | Key of a password stored in the VS Code SecretStorage |
+| `bearerTokenSecret` | Key of a token stored by **AsyncAPI: Set Secret** |
+| `basic.username` | HTTP basic username (this is not a secret) |
+| `basic.passwordSecret` | Key of a password stored by **AsyncAPI: Set Secret** |
+| `bearerToken` / `basic.password` | **Not recommended.** Values stored in `settings.json` may be synced or committed. |
 
 Credentials embedded in the reference itself (`https://user:password@host/api.yaml`) are also
 supported and are stripped from every log message.
@@ -168,14 +168,31 @@ If you do point references at a local schema registry, pin it once:
 ```
 
 When credentials are withheld the request is still made anonymously and the reason is logged in the
-output channel, so a resulting `HTTP 401` tells you which host you still need to pin.
+output channel. An `HTTP 401` or `HTTP 403` for a host that already names a `passwordSecret` /
+`bearerTokenSecret` offers to set that named secret and retries.
 
 ### Keeping credentials out of settings.json
 
-Use `passwordSecret` / `bearerTokenSecret` with the **AsyncAPI: Set Secret** command: it stores the
-value in the VS Code SecretStorage (the OS keychain) under the key you choose, so `settings.json`
-only contains the key name. **AsyncAPI: Delete Secret** removes it, and **AsyncAPI: Clear Remote
-Reference Cache** forces the next preview to fetch the references again.
+Do not put passwords or tokens in `settings.json`. Choose a name, store the value once, and reuse it
+on every host that shares the same SSO credentials:
+
+```jsonc
+"asyncapi.loaders": [
+  {
+    "match": "https://bitbucket.example.com/projects/",
+    "basic": { "username": "my-user", "passwordSecret": "sso" }
+  }
+],
+"asyncapi.remoteAuth": {
+  "basic": { "username": "my-user", "passwordSecret": "sso" }
+}
+```
+
+1. Put the same `passwordSecret` / `bearerTokenSecret` **name** in settings (you pick the name)
+2. Run **AsyncAPI: Set Secret**, choose that name (or **New secret…**), and paste the password or token
+3. The value is stored in the OS keychain; `settings.json` only keeps the name
+
+**AsyncAPI: Delete Secret** lists those names. **AsyncAPI: Clear Remote Reference Cache** forces the next preview to fetch the references again.
 
 ### What a malicious reference can and cannot do
 
@@ -216,7 +233,7 @@ verified.
 Set `"asyncapi.outputVerbosity": "debug"` and check the *AsyncAPI Preview* output channel. Common
 failures are reported with an explicit message in the preview panel:
 
-- `HTTP 401` / `HTTP 403` — wrong or missing credentials for that host.
+- `HTTP 401` / `HTTP 403` — wrong or missing credentials. If settings already name a `passwordSecret` / `bearerTokenSecret`, the preview offers to set that secret and retry.
 - `returned HTML instead of YAML/JSON` — the server answered with a login page (typical for Bitbucket
   behind SSO) instead of the document.
 - `$ref outside of the asyncapi.allowedHosts allow-list` — the host is not in `asyncapi.allowedHosts`.

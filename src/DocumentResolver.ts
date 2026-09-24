@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { configCacheKey, ExtensionConfig, shouldResolveInHost } from './config';
+import { configCacheKey, ExtensionConfig, getConfig, shouldResolveInHost } from './config';
 import { Logger, sanitizeUrl } from './logger';
 import { assertExpansionWithinLimit, bundleExternalRefs, hasRemoteRefs, isRemoteUrl, ReadDocument } from './refBundler';
 import { createRemoteReader } from './remoteFetch';
@@ -12,7 +12,15 @@ import { createRemoteReader } from './remoteFetch';
 export class DocumentResolver {
   private readonly cache = new Map<string, { key: string; document: string }>();
 
-  constructor(private readonly context: vscode.ExtensionContext, private readonly logger: Logger) {}
+  constructor(
+    private readonly context: vscode.ExtensionContext,
+    private readonly logger: Logger,
+    private readonly onAuthFailure?: (info: {
+      url: string;
+      status: number;
+      documentUri?: vscode.Uri;
+    }) => Promise<boolean>
+  ) {}
 
   clear(): void {
     this.cache.clear();
@@ -34,7 +42,7 @@ export class DocumentResolver {
       return cached.document;
     }
 
-    const { document, sources } = await bundleExternalRefs(uri.toString(), text, this.createReader(config));
+    const { document, sources } = await bundleExternalRefs(uri.toString(), text, this.createReader(config, uri));
     assertExpansionWithinLimit(document);
     const serialized = JSON.stringify(document);
 
@@ -47,8 +55,15 @@ export class DocumentResolver {
     return serialized;
   }
 
-  private createReader(config: ExtensionConfig): ReadDocument {
-    const readRemote = createRemoteReader(this.context, config, this.logger);
+  private createReader(config: ExtensionConfig, uri?: vscode.Uri): ReadDocument {
+    const readRemote = createRemoteReader(
+      this.context,
+      () => (uri ? getConfig(uri) : config),
+      this.logger,
+      this.onAuthFailure
+        ? { onAuthFailure: info => this.onAuthFailure!({ ...info, documentUri: uri }) }
+        : undefined
+    );
 
     return async (url: string) => {
       if (!isRemoteUrl(url)) {
